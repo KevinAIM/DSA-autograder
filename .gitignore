@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+chunks_with_embeddings.jsonl
+chunks.jsonl
+*.class

@@ -1,0 +1,227 @@
+# scripts/feedback.py
+import os
+import json
+from typing import Any, Dict, List, Optional
+from pathlib import Path
+
+from scripts import retrieve  # expects retrieve.retrieve(query, k=..., data_path=...)
+# If your repo imports aren't package-style, change to: import retrieve
+
+def _strip_vectors(obj):
+    # removes any large float vectors from nested dict/list structures
+    if isinstance(obj, dict):
+        out = {}
+        for k, v in obj.items():
+            if k == "embedding":
+                continue
+            out[k] = _strip_vectors(v)
+        return out
+
+    if isinstance(obj, list):
+        # if this list looks like an embedding vector, drop it
+        if len(obj) > 50 and all(isinstance(x, (int, float)) for x in obj[:50]):
+            return "<vector_stripped>"
+        return [_strip_vectors(x) for x in obj]
+
+    return obj
+
+
+def _build_query(result: Dict[str, Any], adapter_name: str) -> str:
+    status = result.get("status")
+
+    if status == "fail":
+        # Use evidence (input/expected/actual) to bias retrieval a bit
+        inp = result.get("input")
+        exp = result.get("expected")
+        act = result.get("actual")
+        return (
+            f"{adapter_name}: insertion sort debugging. "
+            f"Common mistakes: wrong loop bounds, overwriting instead of shifting, "
+            f"incorrect comparisons, not preserving key. "
+            f"Failing case input={inp}, expected={exp}, actual={act}."
+        )
+
+    if status == "compile_error":
+        # Compiler errors usually come from signature mismatch / syntax / static vs instance
+        return (
+            f"{adapter_name}: Java compile errors for sorting assignment. "
+            f"Common issues: method signature mismatch, static vs instance, "
+            f"missing return, braces, package/class name mismatch."
+        )
+
+    if status == "runtime_error":
+        return (
+            f"{adapter_name}: Java runtime exceptions in sorting code. "
+            f"Common issues: array index out of bounds, null pointer, infinite loop."
+        )
+
+    if status == "blocked":
+        return (
+            f"{adapter_name}: forbidden APIs and import restrictions for student submissions. "
+            f"Explain why blocked and what is allowed."
+        )
+
+    return f"{adapter_name}: debugging guidance for this assignment."
+
+
+def _format_retrieved_chunks(chunks: List[Dict[str, Any]]) -> str:
+    # Keep it short for the LLM.
+    lines = []
+    for i, ch in enumerate(chunks, start=1):
+        cid = ch.get("chunk_id") or ch.get("id") or ch.get("source_id") or f"chunk_{i}"
+        text = (ch.get("text") or ch.get("content") or "").strip()
+        text = " ".join(text.split())
+        if len(text) > 600:
+            text = text[:600] + "…"
+        lines.append(f"[{cid}] {text}")
+    return "\n".join(lines)
+
+
+def _llm_generate(prompt: str) -> str:
+    """
+    Uses OpenAI if OPENAI_API_KEY is set and the 'openai' package is installed.
+    Otherwise returns a deterministic template response (so pipeline still works).
+    """
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    model = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")  # arbitrary default; override via env
+
+    if not api_key:
+        return (
+            "Feedback generation is not configured (missing OPENAI_API_KEY). "
+            "Here is the evidence and what to check: verify loop bounds, shifting vs overwriting, "
+            "and that the 'key' element is inserted after shifting."
+        )
+
+    try:
+        from openai import OpenAI  # type: ignore
+    except Exception:
+        return (
+            "Feedback generation is not configured (openai package not available). "
+            "Check: method signature, loop bounds, and shifting logic."
+        )
+
+    client = OpenAI(api_key=api_key)
+
+    # Keep it strict and short. JSON output so you can parse it reliably.
+    resp = client.responses.create(
+        model=model,
+        input=prompt,
+    )
+
+    # responses API returns output_text helper in recent SDKs; fallback if not present.
+    text = getattr(resp, "output_text", None)
+    if isinstance(text, str) and text.strip():
+        return text.strip()
+
+    # fallback: try to extract
+    try:
+        return resp.output[0].content[0].text.strip()  # type: ignore
+    except Exception:
+        return "LLM returned an unreadable response."
+
+REFERENCE_FILES = {
+    "M4 Insertion Sort": Path("course_material/M4_insertion_sort_reference.txt"),
+}
+
+def load_reference_text(adapter_name: str) -> str:
+    p = REFERENCE_FILES.get(adapter_name)
+    if not p or not p.exists():
+        return ""
+    return p.read_text(encoding="utf-8").strip()
+
+def generate_feedback(
+    result: Dict[str, Any],
+    student_source: str,
+    adapter_name: str,
+    *,
+    k: int = 5,
+    data_path: str = "data/chunks_with_embeddings.jsonl",
+) -> Dict[str, Any]:
+    query = _build_query(result, adapter_name)
+    chunks = retrieve.retrieve(query, k=k, data_path=data_path)
+    chunks = _strip_vectors(chunks)
+
+    retrieved_meta = [
+    {
+        "chunk_id": c.get("chunk_id"),
+        "page": c.get("page"),
+        "score": c.get("score"),
+    }
+    for c in chunks
+]
+
+
+    chunks_text = _format_retrieved_chunks(chunks)
+    ref_text = load_reference_text(adapter_name)
+    
+
+    # Keep student code short-ish to avoid token blowups.
+    code = student_source.strip()
+    if len(code) > 4000:
+        code = code[:4000] + "\n…(truncated)…"
+
+    prompt = f"""
+You are a TA giving feedback for the method insertionSort in a Java Data Structures assignment.
+
+IMPORTANT:
+- Only discuss the insertionSort method.
+- Do NOT mention merge sort, quick sort, or other algorithms unless they are directly part of this method.
+- Focus only on the runtime error or failing test provided.
+- Be precise and avoid generic algorithm summaries.
+
+Return STRICT JSON with keys:
+- short_explanation: string (2-4 sentences)
+- next_steps: array of 1-3 concrete actions
+- references: array of objects {{id: string, reason: string}}
+
+Context:
+STATUS: {result.get("status")}
+EVIDENCE: {json.dumps(result, ensure_ascii=False)}
+
+Student code:
+{code}
+
+Relevant course material excerpts:
+{chunks_text}
+Reference notes (assignment-specific):
+{ref_text}
+"""
+
+    llm_text = _llm_generate(prompt)
+    t = llm_text.strip()
+
+    # Remove triple backtick fences if present
+    if t.startswith("```"):
+        # Remove starting fence
+        t = t.split("```", 1)[1]
+        # Remove ending fence
+        if "```" in t:
+            t = t.rsplit("```", 1)[0]
+        t = t.strip()
+
+    # Handle optional leading "json"
+    if t.lower().startswith("json"):
+        t = t[4:].lstrip()
+
+
+    # If LLM followed schema, parse. If not, wrap it.
+    try:
+        parsed = json.loads(t)
+        if isinstance(parsed, dict):
+            return _strip_vectors({
+                "query": query,
+                "retrieved_meta": retrieved_meta,
+                **parsed,
+})
+
+    except Exception:
+        pass
+
+    return _strip_vectors({
+        "query": query,
+        "retrieved_meta": retrieved_meta,
+        "short_explanation": llm_text,
+        "next_steps": [],
+        "references": [],
+    })
+

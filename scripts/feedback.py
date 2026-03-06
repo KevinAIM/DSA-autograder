@@ -4,9 +4,6 @@ import json
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 
-from scripts import retrieve  # expects retrieve.retrieve(query, k=..., data_path=...)
-# If your repo imports aren't package-style, change to: import retrieve
-
 def _strip_vectors(obj):
     # removes any large float vectors from nested dict/list structures
     if isinstance(obj, dict):
@@ -62,19 +59,6 @@ def _build_query(result: Dict[str, Any], adapter_name: str) -> str:
         )
 
     return f"{adapter_name}: debugging guidance for this assignment."
-
-
-def _format_retrieved_chunks(chunks: List[Dict[str, Any]]) -> str:
-    # Keep it short for the LLM.
-    lines = []
-    for i, ch in enumerate(chunks, start=1):
-        cid = ch.get("chunk_id") or ch.get("id") or ch.get("source_id") or f"chunk_{i}"
-        text = (ch.get("text") or ch.get("content") or "").strip()
-        text = " ".join(text.split())
-        if len(text) > 600:
-            text = text[:600] + "…"
-        lines.append(f"[{cid}] {text}")
-    return "\n".join(lines)
 
 
 def _llm_generate(prompt: str) -> str:
@@ -133,25 +117,9 @@ def generate_feedback(
     result: Dict[str, Any],
     student_source: str,
     adapter_name: str,
-    *,
-    k: int = 5,
-    data_path: str = "data/chunks_with_embeddings.jsonl",
+
 ) -> Dict[str, Any]:
     query = _build_query(result, adapter_name)
-    chunks = retrieve.retrieve(query, k=k, data_path=data_path)
-    chunks = _strip_vectors(chunks)
-
-    retrieved_meta = [
-    {
-        "chunk_id": c.get("chunk_id"),
-        "page": c.get("page"),
-        "score": c.get("score"),
-    }
-    for c in chunks
-]
-
-
-    chunks_text = _format_retrieved_chunks(chunks)
     ref_text = load_reference_text(adapter_name)
     
 
@@ -181,8 +149,6 @@ EVIDENCE: {json.dumps(result, ensure_ascii=False)}
 Student code:
 {code}
 
-Relevant course material excerpts:
-{chunks_text}
 Reference notes (assignment-specific):
 {ref_text}
 """
@@ -210,7 +176,6 @@ Reference notes (assignment-specific):
         if isinstance(parsed, dict):
             return _strip_vectors({
                 "query": query,
-                "retrieved_meta": retrieved_meta,
                 **parsed,
 })
 
@@ -219,7 +184,6 @@ Reference notes (assignment-specific):
 
     return _strip_vectors({
         "query": query,
-        "retrieved_meta": retrieved_meta,
         "short_explanation": llm_text,
         "next_steps": [],
         "references": [],

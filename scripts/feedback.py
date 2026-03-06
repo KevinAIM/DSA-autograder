@@ -121,7 +121,6 @@ def generate_feedback(
 ) -> Dict[str, Any]:
     query = _build_query(result, adapter_name)
     ref_text = load_reference_text(adapter_name)
-    
 
     # Keep student code short-ish to avoid token blowups.
     code = student_source.strip()

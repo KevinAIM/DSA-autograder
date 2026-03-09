@@ -9,6 +9,17 @@ class M4InsertionSortAdapter(Adapter):
         # Run: java harness.Harness (if we put it in package harness)
         return "harness.Harness"
 
+    def pseudo_code(self):
+        return """
+        for i in 1 to n-1:                  looking through each line of the array
+            key = arr[i]                    the current value we want to insert into the sorted left side
+            j = i - 1                       the index of the last element in the sorted left side
+            while j >= 0 and arr[j] > key:  while we haven't reached the beginning and the current element is greater than key
+                arr[j + 1] = arr[j]         shift the current element one position to the right
+                j = j - 1                   move left in the sorted portion
+            arr[j + 1] = key                insert key into its correct position in the sorted left side
+        """
+    
     def write_harness(self, harness_path: Path) -> None:
         # A harness that:
         # 1) runs multiple tests

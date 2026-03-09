@@ -18,3 +18,7 @@ class Adapter:
     def harness_main_class(self) -> str:
         """The class name to run with `java`."""
         raise NotImplementedError
+
+    def pseudo_code(self) -> str:
+        """Returns the pseudo code for this assignment."""
+        raise NotImplementedError

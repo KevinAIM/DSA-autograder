@@ -39,7 +39,7 @@ def main():
     if scan["status"] != "ok":
         result = {"status": "blocked", "scan": scan}
 
-        result["feedback"] = generate_feedback(result, source, adapter.name)
+        result["feedback"] = generate_feedback(result, source, adapter.name, adapter.pseudo_code())
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
@@ -55,7 +55,7 @@ def main():
     if c1["status"] != "ok":
         result = {"status": "compile_error", "which": "student", "compile": c1}
 
-        result["feedback"] = generate_feedback(result, source, adapter.name)
+        result["feedback"] = generate_feedback(result, source, adapter.name, adapter.pseudo_code())
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
@@ -65,7 +65,7 @@ def main():
     if c2["status"] != "ok":
         result = {"status": "compile_error", "which": "harness", "compile": c2}
 
-        result["feedback"] = generate_feedback(result, source, adapter.name)
+        result["feedback"] = generate_feedback(result, source, adapter.name, adapter.pseudo_code())
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
@@ -76,7 +76,7 @@ def main():
     if run["status"] != "ok":
         result = {"status": "runtime_error", "run": run}
 
-        result["feedback"] = generate_feedback(result, source, adapter.name)
+        result["feedback"] = generate_feedback(result, source, adapter.name, adapter.pseudo_code())
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
@@ -98,7 +98,7 @@ def main():
             "actual": h.get("actual"),
         }
 
-        result["feedback"] = generate_feedback(result, source, adapter.name)
+        result["feedback"] = generate_feedback(result, source, adapter.name, adapter.pseudo_code())
         print(json.dumps(result, ensure_ascii=False))
 
         return
@@ -112,7 +112,7 @@ def main():
             "exception": h.get("exception"),
         }
 
-        result["feedback"] = generate_feedback(result, source, adapter.name)
+        result["feedback"] = generate_feedback(result, source, adapter.name, adapter.pseudo_code())
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
@@ -120,7 +120,7 @@ def main():
 
 
     result = {"status": "unknown_harness_output", "harness": h, "raw": run}
-    result["feedback"] = generate_feedback(result, source, adapter.name)
+    result["feedback"] = generate_feedback(result, source, adapter.name, adapter.pseudo_code())
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

@@ -1,27 +1,7 @@
 # scripts/feedback.py
 import os
 import json
-from typing import Any, Dict, List, Optional
-from pathlib import Path
-
-def _strip_vectors(obj):
-    # removes any large float vectors from nested dict/list structures
-    if isinstance(obj, dict):
-        out = {}
-        for k, v in obj.items():
-            if k == "embedding":
-                continue
-            out[k] = _strip_vectors(v)
-        return out
-
-    if isinstance(obj, list):
-        # if this list looks like an embedding vector, drop it
-        if len(obj) > 50 and all(isinstance(x, (int, float)) for x in obj[:50]):
-            return "<vector_stripped>"
-        return [_strip_vectors(x) for x in obj]
-
-    return obj
-
+from typing import Any, Dict
 
 def _build_query(result: Dict[str, Any], adapter_name: str) -> str:
     status = result.get("status")
@@ -103,24 +83,14 @@ def _llm_generate(prompt: str) -> str:
     except Exception:
         return "LLM returned an unreadable response."
 
-REFERENCE_FILES = {
-    "M4 Insertion Sort": Path("course_material/M4_insertion_sort_reference.txt"),
-}
-
-def load_reference_text(adapter_name: str) -> str:
-    p = REFERENCE_FILES.get(adapter_name)
-    if not p or not p.exists():
-        return ""
-    return p.read_text(encoding="utf-8").strip()
-
 def generate_feedback(
     result: Dict[str, Any],
     student_source: str,
     adapter_name: str,
+    ref_text: str,
 
 ) -> Dict[str, Any]:
     query = _build_query(result, adapter_name)
-    ref_text = load_reference_text(adapter_name)
 
     # Keep student code short-ish to avoid token blowups.
     code = student_source.strip()
@@ -173,18 +143,18 @@ Reference notes (assignment-specific):
     try:
         parsed = json.loads(t)
         if isinstance(parsed, dict):
-            return _strip_vectors({
+            return {
                 "query": query,
                 **parsed,
-})
+}
 
     except Exception:
         pass
 
-    return _strip_vectors({
+    return {
         "query": query,
         "short_explanation": llm_text,
         "next_steps": [],
         "references": [],
-    })
+    }
 

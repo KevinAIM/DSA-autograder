@@ -13,8 +13,7 @@ def _build_query(result: Dict[str, Any], adapter_name: str, method_name: str) ->
         act = result.get("actual")
         return (
             f"{adapter_name}: {method_name} debugging. "
-            f"Common mistakes: wrong loop bounds, overwriting instead of shifting, "
-            f"incorrect comparisons, not preserving key. "
+            f"Common mistakes: unimplemented method, wrong base case, incorrect indices, off-by-one errors. "
             f"Failing case input={inp}, expected={exp}, actual={act}."
         )
 

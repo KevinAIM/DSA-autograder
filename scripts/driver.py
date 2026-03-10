@@ -25,7 +25,7 @@ def parse_harness_stdout(stdout: str) -> dict:
 
 def main():
     adapter = M4SortsAdapter(
-        name="Insertion Sort",
+        name="M4 Sorts",
         module="M4",
         student_java=Path("M4/Sort.java"),
         package="M4",

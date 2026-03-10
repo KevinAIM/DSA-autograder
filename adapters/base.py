@@ -11,14 +11,14 @@ class Adapter:
     student_class: str          # e.g. "Sort"
     timeout_sec: float = 2.0
 
-    def write_harness(self, harness_path: Path) -> None:
+    def write_harness(self, harness_path: Path, method: dict) -> None:
         """Generate a Java harness that calls student code and prints machine-readable results."""
         raise NotImplementedError
 
     def harness_main_class(self) -> str:
         """The class name to run with `java`."""
         raise NotImplementedError
-
-    def pseudo_code(self) -> str:
-        """Returns the pseudo code for this assignment."""
+    
+    def methods(self) -> list:
+        """Returns a list of method dicts with keys: name, return_type, params."""
         raise NotImplementedError

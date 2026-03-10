@@ -2,25 +2,19 @@ from pathlib import Path
 from adapters.base import Adapter
 
 
-class M4InsertionSortAdapter(Adapter):
-    method_name: str = "insertionSort"   # change if your skeleton uses a different name
-
+class M4SortsAdapter(Adapter):
     def harness_main_class(self) -> str:
         # Run: java harness.Harness (if we put it in package harness)
         return "harness.Harness"
 
-    def pseudo_code(self):
-        return """
-        for i in 1 to n-1:                  looking through each line of the array
-            key = arr[i]                    the current value we want to insert into the sorted left side
-            j = i - 1                       the index of the last element in the sorted left side
-            while j >= 0 and arr[j] > key:  while we haven't reached the beginning and the current element is greater than key
-                arr[j + 1] = arr[j]         shift the current element one position to the right
-                j = j - 1                   move left in the sorted portion
-            arr[j + 1] = key                insert key into its correct position in the sorted left side
-        """
-    
-    def write_harness(self, harness_path: Path) -> None:
+    def methods(self) -> list:
+        return [{"method_name": "insertionSort", "pseudo_code": "todo"},
+                {"method_name": "merge_sort", "pseudo_code": "todo"},
+                {"method_name": "merge", "pseudo_code": "todo"},
+                {"method_name": "quick_sort", "pseudo_code": "todo"},
+                {"method_name": "partition", "pseudo_code": "todo"}]
+
+    def write_harness(self, harness_path: Path, method: dict) -> None:
         # A harness that:
         # 1) runs multiple tests
         # 2) compares to Arrays.sort on a copy (oracle)
@@ -65,7 +59,7 @@ public class Harness {{
 
             try {{
                 // call student method (assumes static void insertionSort(int[]))
-                {self.student_class}.{self.method_name}(actual);
+                {self.student_class}.{method["method_name"]}(actual);
             }} catch (Throwable t) {{
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);

@@ -37,7 +37,7 @@ public class Harness {
 
             try {
                 // call student method (assumes static void insertionSort(int[]))
-                Sort.insertionSort(actual);
+                Sort.partition(actual);
             } catch (Throwable t) {
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);

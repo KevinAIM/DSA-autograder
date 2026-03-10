@@ -3,7 +3,7 @@ import os
 import json
 from typing import Any, Dict
 
-def _build_query(result: Dict[str, Any], adapter_name: str) -> str:
+def _build_query(result: Dict[str, Any], adapter_name: str, method_name: str) -> str:
     status = result.get("status")
 
     if status == "fail":
@@ -12,7 +12,7 @@ def _build_query(result: Dict[str, Any], adapter_name: str) -> str:
         exp = result.get("expected")
         act = result.get("actual")
         return (
-            f"{adapter_name}: insertion sort debugging. "
+            f"{adapter_name}: {method_name} debugging. "
             f"Common mistakes: wrong loop bounds, overwriting instead of shifting, "
             f"incorrect comparisons, not preserving key. "
             f"Failing case input={inp}, expected={exp}, actual={act}."
@@ -88,9 +88,10 @@ def generate_feedback(
     student_source: str,
     adapter_name: str,
     ref_text: str,
+    method_name: str,
 
 ) -> Dict[str, Any]:
-    query = _build_query(result, adapter_name)
+    query = _build_query(result, adapter_name, method_name)
 
     # Keep student code short-ish to avoid token blowups.
     code = student_source.strip()
@@ -98,10 +99,10 @@ def generate_feedback(
         code = code[:4000] + "\n…(truncated)…"
 
     prompt = f"""
-You are a TA giving feedback for the method insertionSort in a Java Data Structures assignment.
+You are a TA giving feedback for the method {method_name} in a Java Data Structures assignment.
 
 IMPORTANT:
-- Only discuss the insertionSort method.
+- Only discuss the {method_name} method.
 - Do NOT mention merge sort, quick sort, or other algorithms unless they are directly part of this method.
 - Focus only on the runtime error or failing test provided.
 - Be precise and avoid generic algorithm summaries.

@@ -8,17 +8,14 @@ class M4SortsAdapter(Adapter):
         return "harness.Harness"
 
     def methods(self) -> list:
-        return [{"method_name": "insertionSort", "pseudo_code": "todo"},
-                {"method_name": "merge_sort", "pseudo_code": "todo"},
-                {"method_name": "merge", "pseudo_code": "todo"},
-                {"method_name": "quick_sort", "pseudo_code": "todo"},
-                {"method_name": "partition", "pseudo_code": "todo"}]
+        return [{"method_name": "insertionSort", "pseudo_code": "todo", "call_args" : "actual"},
+                {"method_name": "merge_sort", "pseudo_code": "todo", "call_args" : "actual, 0, actual.length - 1"},
+                {"method_name": "merge", "pseudo_code": "todo", "call_args" : "actual, 0, actual.length / 2, actual.length - 1"},
+                {"method_name": "quick_sort", "pseudo_code": "todo", "call_args" : "actual, 0, actual.length - 1"},
+                {"method_name": "partition", "pseudo_code": "todo", "call_args" : "actual, 0, actual.length - 1"}]
 
     def write_harness(self, harness_path: Path, method: dict) -> None:
-        # A harness that:
-        # 1) runs multiple tests
-        # 2) compares to Arrays.sort on a copy (oracle)
-        # 3) prints a single JSON line with pass/fail + first failing case
+
         code = f"""\
 package harness;
 
@@ -38,6 +35,8 @@ public class Harness {{
     }}
 
     public static void main(String[] args) {{
+        {self.student_class} obj = new {self.student_class}();
+        // test loop below...
         // Define a small but useful test set (can expand later)
         int[][] tests = new int[][] {{
             new int[] {{}},
@@ -59,7 +58,7 @@ public class Harness {{
 
             try {{
                 // call student method (assumes static void insertionSort(int[]))
-                {self.student_class}.{method["method_name"]}(actual);
+                obj.{method["method_name"]}({method["call_args"]});
             }} catch (Throwable t) {{
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);

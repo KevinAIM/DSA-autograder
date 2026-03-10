@@ -16,6 +16,8 @@ public class Harness {
     }
 
     public static void main(String[] args) {
+        Sort obj = new Sort();
+        // test loop below...
         // Define a small but useful test set (can expand later)
         int[][] tests = new int[][] {
             new int[] {},
@@ -37,7 +39,7 @@ public class Harness {
 
             try {
                 // call student method (assumes static void insertionSort(int[]))
-                Sort.partition(actual);
+                obj.partition(actual, 0, actual.length - 1);
             } catch (Throwable t) {
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);

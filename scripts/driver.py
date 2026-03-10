@@ -39,7 +39,7 @@ def main():
     if scan["status"] != "ok":
         result = {"status": "blocked", "scan": scan}
 
-        result["feedback"] = generate_feedback(result, source, adapter.name, "N/A")
+        result["feedback"] = generate_feedback(result, source, adapter.name, "N/A", "N/A")
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
@@ -50,7 +50,7 @@ def main():
     if c1["status"] != "ok":
         result = {"status": "compile_error", "which": "student", "compile": c1}
 
-        result["feedback"] = generate_feedback(result, source, adapter.name, "N/A")
+        result["feedback"] = generate_feedback(result, source, adapter.name, "N/A", "N/A")
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
@@ -65,9 +65,12 @@ def main():
 
         c2 = compile_java(str(harness_path))
         if c2["status"] != "ok":
-            result = {"status": "compile_error", "which": "harness", "compile": c2}
+            result = {"status": "compile_error", 
+                      "which": "harness", 
+                      "compile": c2, 
+                      "method": method["method_name"]}
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"])
+            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method["method_name"])
             print(json.dumps(result, ensure_ascii=False, indent=2))
 
             continue
@@ -75,9 +78,11 @@ def main():
         # 4) run harness
         run = run_java(adapter.harness_main_class(), timeout_sec=adapter.timeout_sec)
         if run["status"] != "ok":
-            result = {"status": "runtime_error", "run": run}
+            result = {"status": "runtime_error", 
+                      "run": run, 
+                      "method": method["method_name"]}
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"])
+            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method["method_name"])
             print(json.dumps(result, ensure_ascii=False, indent=2))
 
             continue
@@ -86,7 +91,7 @@ def main():
         h = parse_harness_stdout(run.get("stdout", ""))
 
         if h.get("status") == "pass":
-            print(json.dumps({"status": "pass", "tests": h.get("tests")}, ensure_ascii=False))
+            print(json.dumps({"status": "pass", "tests": h.get("tests"), "method" : method["method_name"]}, ensure_ascii=False))
 
             continue
 
@@ -96,10 +101,11 @@ def main():
                 "testIndex": h.get("testIndex"),
                 "input": h.get("input"),
                 "expected": h.get("expected"),
-                "actual": h.get("actual"),
+                "actual": h.get("actual"), 
+                "method": method["method_name"]
             }
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"])
+            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method["method_name"])
             print(json.dumps(result, ensure_ascii=False))
 
             continue
@@ -111,9 +117,10 @@ def main():
                 "testIndex": h.get("testIndex"),
                 "input": h.get("input"),
                 "exception": h.get("exception"),
+                "method": method["method_name"]
             }
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"])
+            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method["method_name"])
             print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
@@ -121,7 +128,7 @@ def main():
 
 
         result = {"status": "unknown_harness_output", "harness": h, "raw": run}
-        result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"])
+        result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method["method_name"])
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

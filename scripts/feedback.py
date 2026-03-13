@@ -7,10 +7,15 @@ def _build_query(result: Dict[str, Any], adapter_name: str, method_name: str) ->
     status = result.get("status")
 
     if status == "fail":
-        # Use evidence (input/expected/actual) to bias retrieval a bit
         inp = result.get("input")
         exp = result.get("expected")
         act = result.get("actual")
+        if result.get("reason"):
+            return (
+                f"{adapter_name}: {method_name} debugging. "
+                f"Common mistakes: unimplemented method, wrong base case, incorrect indices, off-by-one errors. "
+                f"Failing case input={inp}, reason={result.get('reason')}."
+            )
         return (
             f"{adapter_name}: {method_name} debugging. "
             f"Common mistakes: unimplemented method, wrong base case, incorrect indices, off-by-one errors. "

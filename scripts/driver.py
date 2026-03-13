@@ -96,14 +96,23 @@ def main():
             continue
 
         if h.get("status") == "fail":
-            result = {
-                "status": "fail",
-                "testIndex": h.get("testIndex"),
-                "input": h.get("input"),
-                "expected": h.get("expected"),
-                "actual": h.get("actual"), 
-                "method": method["method_name"]
-            }
+            if method.get("harness_type") == "partition":
+                result = {
+                    "status": "fail",
+                    "method": method["method_name"],
+                    "testIndex": h.get("testIndex"),
+                    "reason": h.get("reason"),  # partition uses "reason" not expected/actual
+                    "input": h.get("input"),
+                }
+            else:
+                result = {
+                    "status": "fail",
+                    "method": method["method_name"],
+                    "testIndex": h.get("testIndex"),
+                    "input": h.get("input"),
+                    "expected": h.get("expected"),
+                    "actual": h.get("actual"),
+                }
 
             result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method["method_name"])
             print(json.dumps(result, ensure_ascii=False))

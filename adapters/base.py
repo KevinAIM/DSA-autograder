@@ -22,3 +22,4 @@ class Adapter:
     def methods(self) -> list:
         """Returns a list of method dicts with keys: name, return_type, params."""
         raise NotImplementedError
+    

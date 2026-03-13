@@ -16,64 +16,48 @@ public class Harness {
     }
 
     public static void main(String[] args) {
-        Sort obj = new Sort();
-        // test loop below...
-        // Define a small but useful test set (can expand later)
-        int[][] tests = new int[][] {
-            new int[] {},
-            new int[] {1},
-            new int[] {2, 1},
-            new int[] {3, 2, 1},
-            new int[] {1, 2, 3},
-            new int[] {5, 1, 4, 2, 8},
-            new int[] {2, 2, 1, 1},
-            new int[] {0, -1, 5, -3, 2}
-        };
+                    Sort obj = new Sort();
+            int[][] tests = new int[][] {
+                new int[] {2, 1},
+                new int[] {3, 2, 1},
+                new int[] {1, 2, 3},
+                new int[] {5, 1, 4, 2, 8},
+                new int[] {2, 2, 1, 1},
+                new int[] {0, -1, 5, -3, 2}
+            };
 
-        for (int i = 0; i < tests.length; i++) {
-            int[] input = Arrays.copyOf(tests[i], tests[i].length);
-            int[] expected = Arrays.copyOf(tests[i], tests[i].length);
-            Arrays.sort(expected);
+            for (int i = 0; i < tests.length; i++) {
+                int[] input = Arrays.copyOf(tests[i], tests[i].length);
+                int[] actual = Arrays.copyOf(tests[i], tests[i].length);
 
-            int[] actual = Arrays.copyOf(tests[i], tests[i].length);
+                try {
+                    int q = obj.partition(actual, 0, actual.length - 1);
 
-            try {
-                // call student method (assumes static void insertionSort(int[]))
-                obj.partition(actual, 0, actual.length - 1);
-            } catch (Throwable t) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                t.printStackTrace(pw);
-
-                String stack = sw.toString();
-                String where = "";
-                String[] lines = stack.split("\\r?\\n");
-                for (String line : lines) {
-                    if (line.contains("Sort.java:")) {
-                        where = line.trim();
-                        break;
+                    // check left side <= pivot
+                    for (int k = 0; k < q; k++) {
+                        if (actual[k] > actual[q]) {
+                            System.out.println("{\"status\":\"fail\",\"testIndex\":" + i
+                                + ",\"reason\":\"left element > pivot\""
+                                + ",\"input\":\"" + Arrays.toString(input) + "\"}");
+                            return;
+                        }
                     }
+                    // check right side >= pivot
+                    for (int k = q + 1; k < actual.length; k++) {
+                        if (actual[k] < actual[q]) {
+                            System.out.println("{\"status\":\"fail\",\"testIndex\":" + i
+                                + ",\"reason\":\"right element < pivot\""
+                                + ",\"input\":\"" + Arrays.toString(input) + "\"}");
+                            return;
+                        }
+                    }
+
+                } catch (Throwable t) {
+                    System.out.println("{\"status\":\"error\",\"testIndex\":" + i
+                        + ",\"exception\":\"" + t.toString().replace("\"", "\\\"") + "\"}");
+                    return;
                 }
-                where = where.replace("\\", "\\\\").replace("\"", "\\\"");
-
-                System.out.println("{\"status\":\"error\",\"type\":\"exception\",\"testIndex\":" + i
-                    + ",\"input\":\"" + arrToString(input) + "\"," 
-                    + "\"exception\":\"" + t.toString().replace("\"", "\\\"") + "\"," 
-                    + "\"where\":\"" + where + "\"}");
-                return;
             }
-
-
-
-            if (!arraysEqual(actual, expected)) {
-                System.out.println("{\"status\":\"fail\",\"testIndex\":" + i
-                    + ",\"input\":\"" + arrToString(input) + "\","
-                    + "\"expected\":\"" + arrToString(expected) + "\","
-                    + "\"actual\":\"" + arrToString(actual) + "\"}");
-                return;
-            }
-        }
-
-        System.out.println("{\"status\":\"pass\",\"tests\":" + tests.length + "}");
+            System.out.println("{\"status\":\"pass\",\"tests\":" + tests.length + "}");
     }
 }

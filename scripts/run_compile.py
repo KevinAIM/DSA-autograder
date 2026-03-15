@@ -98,12 +98,15 @@ def scan_java_source(source: str) -> dict:
     }
 
 
-def compile_java(java_file: str) -> dict:
+def compile_java(java_files) -> dict:
+    if isinstance(java_files, str):
+        java_files = [java_files]
     r = subprocess.run(
-        ["javac", java_file],
+        ["javac"] + java_files,
         capture_output=True,
         text=True
     )
+    
     if r.returncode == 0:
         return {"status": "ok"}
     return {

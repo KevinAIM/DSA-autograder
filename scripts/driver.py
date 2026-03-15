@@ -27,26 +27,27 @@ def main():
     adapter = M4SortsAdapter(
         name="M4 Sorts",
         module="M4",
-        student_java=Path("M4/Sort.java"),
+        student_files=[Path("M4/Sort.java")],
         package="M4",
         student_class="Sort",
         timeout_sec=5.0,  # start higher than 2.0
     )
 
     # 1) pre-run scan
-    source = read_text(str(adapter.student_java))
-    scan = scan_java_source(source)
-    if scan["status"] != "ok":
-        result = {"status": "blocked", "scan": scan}
-
-        result["feedback"] = generate_feedback(result, source, adapter.name, "N/A", "N/A")
-        print(json.dumps(result, ensure_ascii=False, indent=2))
-
-
-        return
+    for file in adapter.student_files:
+        source = read_text(str(file))
+        scan = scan_java_source(source)
+        if scan["status"] != "ok":
+            result = {"status": "blocked", "scan": scan}
+            result["feedback"] = generate_feedback(result, source, adapter.name, "N/A", "N/A")
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return
+        
+    source = "\n".join(read_text(str(f)) for f in adapter.student_files)
+    
 
     # 2 compile student + harness
-    c1 = compile_java(str(adapter.student_java))
+    c1 = compile_java([str(f) for f in adapter.student_files])
     if c1["status"] != "ok":
         result = {"status": "compile_error", "which": "student", "compile": c1}
 

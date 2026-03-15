@@ -6,9 +6,9 @@ from typing import Dict, Any
 class Adapter:
     name: str
     module: str
-    student_java: Path          # e.g. Path("M4/Sort.java")
-    package: str                # e.g. "M4"
-    student_class: str          # e.g. "Sort"
+    student_files: list
+    package: str
+    student_class: str
     timeout_sec: float = 2.0
 
     def write_harness(self, harness_path: Path, method: dict) -> None:

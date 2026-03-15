@@ -1,8 +1,6 @@
 import json
 from pathlib import Path
 from scripts.feedback import generate_feedback
-
-from adapters.m4_sorts import M4SortsAdapter
 from scripts.run_compile import compile_java, run_java, read_text, scan_java_source
 
 
@@ -24,14 +22,35 @@ def parse_harness_stdout(stdout: str) -> dict:
 
 
 def main():
-    adapter = M4SortsAdapter(
-        name="M4 Sorts",
-        module="M4",
-        student_files=[Path("M4/Sort.java")],
-        package="M4",
-        student_class="Sort",
-        timeout_sec=5.0,  # start higher than 2.0
-    )
+    MODULE = "M5"  # change to "M_" to grade M4 sorts, "M5" for M5 data structures, etc...
+
+    if MODULE == "M4":
+        from adapters.m4_sorts import M4SortsAdapter
+        adapter = M4SortsAdapter(
+            name="M4 Sorts",
+            module="M4",
+            student_files=[Path("M4/Sort.java")],
+            package="M4",
+            student_class="Sort",
+            timeout_sec=5.0,
+        )
+    elif MODULE == "M5":
+        from adapters.m5_data_structures import M5DataStructuresAdapter
+        adapter = M5DataStructuresAdapter(
+            name="M5 Data Structures",
+            module="M5",
+            student_files=[
+                Path("M5/Stack.java"),
+                Path("M5/Queue.java"),
+                Path("M5/ListNode.java"),
+                Path("M5/LinkedList.java"),
+                Path("M5/TreeNode.java"),
+                Path("M5/BinarySearchTree.java"),
+            ],
+            package="M5",
+            student_class="",
+            timeout_sec=5.0,
+        )
 
     # 1) pre-run scan
     for file in adapter.student_files:
@@ -69,9 +88,9 @@ def main():
             result = {"status": "compile_error", 
                       "which": "harness", 
                       "compile": c2, 
-                      "method": method["method_name"]}
+                      "method": method.get("method_name") or method.get("class_name")}
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method["method_name"])
+            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method.get("method_name") or method.get("class_name"))
             print(json.dumps(result, ensure_ascii=False, indent=2))
 
             continue
@@ -81,9 +100,9 @@ def main():
         if run["status"] != "ok":
             result = {"status": "runtime_error", 
                       "run": run, 
-                      "method": method["method_name"]}
+                      "method": method.get("method_name") or method.get("class_name")}
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method["method_name"])
+            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method.get("method_name") or method.get("class_name"))
             print(json.dumps(result, ensure_ascii=False, indent=2))
 
             continue
@@ -92,7 +111,9 @@ def main():
         h = parse_harness_stdout(run.get("stdout", ""))
 
         if h.get("status") == "pass":
-            print(json.dumps({"status": "pass", "tests": h.get("tests"), "method" : method["method_name"]}, ensure_ascii=False))
+            name = method.get("method_name") or method.get("class_name")
+            key = "method" if method.get("method_name") else "class"
+            print(json.dumps({"status": "pass", key: name}, ensure_ascii=False))
 
             continue
 
@@ -100,7 +121,7 @@ def main():
             if method.get("harness_type") == "partition":
                 result = {
                     "status": "fail",
-                    "method": method["method_name"],
+                    "method": method.get("method_name") or method.get("class_name"),
                     "testIndex": h.get("testIndex"),
                     "reason": h.get("reason"),  # partition uses "reason" not expected/actual
                     "input": h.get("input"),
@@ -108,14 +129,14 @@ def main():
             else:
                 result = {
                     "status": "fail",
-                    "method": method["method_name"],
+                    "method": method.get("method_name") or method.get("class_name"),
                     "testIndex": h.get("testIndex"),
                     "input": h.get("input"),
                     "expected": h.get("expected"),
                     "actual": h.get("actual"),
                 }
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method["method_name"])
+            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method.get("method_name") or method.get("class_name"))
             print(json.dumps(result, ensure_ascii=False))
 
             continue
@@ -127,10 +148,10 @@ def main():
                 "testIndex": h.get("testIndex"),
                 "input": h.get("input"),
                 "exception": h.get("exception"),
-                "method": method["method_name"]
+                "method": method.get("method_name") or method.get("class_name")
             }
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method["method_name"])
+            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method.get("method_name") or method.get("class_name"))
             print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
@@ -138,7 +159,7 @@ def main():
 
 
         result = {"status": "unknown_harness_output", "harness": h, "raw": run}
-        result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method["method_name"])
+        result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method.get("method_name") or method.get("class_name"))
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

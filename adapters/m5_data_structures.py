@@ -7,7 +7,7 @@ class M5DataStructuresAdapter(Adapter):
         return "harness.Harness"
     
     def methods(self) -> list:
-        return [{"class_name": "Stack", "harness_type": "stack", "pseduo_code": """
+        return [{"class_name": "Stack", "harness_type": "stack", "pseudo_code": """
 STACK-EMPTY(S):
     if S.top == 0:          // check if stack has no elements
         return TRUE
@@ -24,7 +24,7 @@ POP(S):
         S.top = S.top - 1   // decrement top pointer
         return S[S.top + 1] // return the removed element
 """},
-                {"class_name": "Queue", "harness_type": "queue", "pseduo_code": """
+                {"class_name": "Queue", "harness_type": "queue", "pseudo_code": """
 ENQUEUE(Q, x):
     Q[Q.tail] = x                       // place element at tail
     if Q.tail == Q.length:              // wrap around if at end
@@ -40,7 +40,7 @@ DEQUEUE(Q):
         Q.head = Q.head + 1
     return x
 """},
-                {"class_name": "linkedList", "harness_type": "linkedList", "pseduo_code": """
+                {"class_name": "linkedList", "harness_type": "linkedlist", "pseudo_code": """
 LIST-SEARCH(L, k):
     x = L.head                          // start from head
     while x != NIL and x.key != k:     // traverse until found or end
@@ -62,7 +62,7 @@ LIST-DELETE(L, x):
     if x.next != NIL:                   // if not the last node
         x.next.prev = x.prev            // bypass x from the right
 """},
-                {"class_name": "BinarySearchTree", "harness_type": "bst", "pseduo_code": """
+                {"class_name": "BinarySearchTree", "harness_type": "bst", "pseudo_code": """
 INORDER-TREE-WALK(x):
     if x != NIL:                        // base case: empty subtree
         INORDER-TREE-WALK(x.left)       // visit left subtree first
@@ -122,19 +122,19 @@ TREE-INSERT(T, z):
         y.right = z
 """}]
     
-def write_harness(self, harness_path: Path, method: dict) -> None:
-    harness_type = method.get("harness_type")
-    
-    if harness_type == "stack":
-        main_body = self._stack_main(method)
-    elif harness_type == "queue":
-        main_body = self._queue_main(method)
-    elif harness_type == "linkedlist":
-        main_body = self._linkedlist_main(method)
-    elif harness_type == "bst":
-        main_body = self._bst_main(method)
+    def write_harness(self, harness_path: Path, method: dict) -> None:
+        harness_type = method.get("harness_type")
+        
+        if harness_type == "stack":
+            main_body = self._stack_main(method)
+        elif harness_type == "queue":
+            main_body = self._queue_main(method)
+        elif harness_type == "linkedlist":
+            main_body = self._linkedlist_main(method)
+        elif harness_type == "bst":
+            main_body = self._bst_main(method)
 
-    code = f"""\
+        code = f"""\
 package harness;
 
 import M5.Stack;
@@ -150,8 +150,8 @@ public class Harness {{
     }}
 }}
 """
-    harness_path.parent.mkdir(parents=True, exist_ok=True)
-    harness_path.write_text(code, encoding="utf-8")
+        harness_path.parent.mkdir(parents=True, exist_ok=True)
+        harness_path.write_text(code, encoding="utf-8")
 
     def _stack_main(self, method):
         return f"""
@@ -201,7 +201,7 @@ if (emptyPop != -1) {{
 System.out.println("{{\\"status\\":\\"pass\\",\\"class\\":\\"Stack\\"}}");
 """
 
-    def _stack_main(self, method):
+    def _queue_main(self, method):
         return f"""
 Queue q = new Queue(10);
 

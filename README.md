@@ -97,6 +97,7 @@ For methods that are helpers rather than standalone sorts (e.g. `merge`, `partit
 | Module | Assignment | Methods |
 |--------|------------|---------|
 | M4 | Sorting Algorithms | `insertionSort`, `merge_sort`, `merge`, `quick_sort`, `partition` |
+| M5 | Basic Data Structures | `Stack` (empty, push, pop), `Queue` (enqueue, dequeue), `LinkedList` (insert, search, delete), `BinarySearchTree` (insert, inorder_tree_walk, search, iterative_search, minimum, maximum, successor) |
 
 ---
 

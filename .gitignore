@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
-chunks_with_embeddings.jsonl
-chunks.jsonl
 *.class
+vector_store/
+slides/*_extracted.json
+.vscode/

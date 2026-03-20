@@ -1,9 +1,0 @@
-{
-  "M4": {
-    "insertionSort": 4,
-    "merge_sort": 0,
-    "merge": 0,
-    "quick_sort": 0,
-    "partition": 0
-  }
-}

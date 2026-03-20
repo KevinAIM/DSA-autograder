@@ -10,6 +10,7 @@ class Adapter:
     package: str
     student_class: str
     timeout_sec: float = 2.0
+    db_path: Path = None
 
     def write_harness(self, harness_path: Path, method: dict) -> None:
         """Generate a Java harness that calls student code and prints machine-readable results."""

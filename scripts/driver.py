@@ -2,6 +2,12 @@ import json
 from pathlib import Path
 from scripts.feedback import generate_feedback
 from scripts.run_compile import compile_java, run_java, read_text, scan_java_source
+from scripts.ingest_slides import query_slides
+from openai import OpenAI
+import os
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 
 
 
@@ -22,7 +28,7 @@ def parse_harness_stdout(stdout: str) -> dict:
 
 
 def main():
-    MODULE = "M5"  # change to "M_" to grade M4 sorts, "M5" for M5 data structures, etc...
+    MODULE = "M4"  # change to "M_" to grade M4 sorts, "M5" for M5 data structures, etc...
 
     if MODULE == "M4":
         from adapters.m4_sorts import M4SortsAdapter
@@ -33,6 +39,7 @@ def main():
             package="M4",
             student_class="Sort",
             timeout_sec=5.0,
+            db_path=Path("vector_store/dsa_m4")
         )
     elif MODULE == "M5":
         from adapters.m5_data_structures import M5DataStructuresAdapter
@@ -76,6 +83,8 @@ def main():
 
         return
 
+
+
     for method in adapter.methods():
 
         # 2) generate harness
@@ -85,12 +94,19 @@ def main():
 
         c2 = compile_java(str(harness_path))
         if c2["status"] != "ok":
+                        #retrieve relevant slides
+            ref_text = method.get("pseudo_code", "") #fallback if no pseudo code provided
+            if adapter.db_path and adapter.db_path.exists():
+                query = f"{method.get('method_name') or method.get('class_name')}"
+                retrieved = query_slides(query, adapter.db_path, client)
+                ref_text = "\n\n".join(retrieved)
+                
             result = {"status": "compile_error", 
                       "which": "harness", 
                       "compile": c2, 
                       "method": method.get("method_name") or method.get("class_name")}
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method.get("method_name") or method.get("class_name"))
+            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, method.get("method_name") or method.get("class_name"))
             print(json.dumps(result, ensure_ascii=False, indent=2))
 
             continue
@@ -102,7 +118,7 @@ def main():
                       "run": run, 
                       "method": method.get("method_name") or method.get("class_name")}
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method.get("method_name") or method.get("class_name"))
+            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, method.get("method_name") or method.get("class_name"))
             print(json.dumps(result, ensure_ascii=False, indent=2))
 
             continue
@@ -118,6 +134,13 @@ def main():
             continue
 
         if h.get("status") == "fail":
+                    #retrieve relevant slides
+            ref_text = method.get("pseudo_code", "") #fallback if no pseudo code provided
+            if adapter.db_path and adapter.db_path.exists():
+                query = f"{method.get('method_name') or method.get('class_name')}"
+                retrieved = query_slides(query, adapter.db_path, client)
+                ref_text = "\n\n".join(retrieved)
+
             if method.get("harness_type") == "partition":
                 result = {
                     "status": "fail",
@@ -136,12 +159,19 @@ def main():
                     "actual": h.get("actual"),
                 }
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method.get("method_name") or method.get("class_name"))
+            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, method.get("method_name") or method.get("class_name"))
             print(json.dumps(result, ensure_ascii=False))
 
             continue
         
         if h.get("status") == "error":
+                        #retrieve relevant slides
+            ref_text = method.get("pseudo_code", "") #fallback if no pseudo code provided
+            if adapter.db_path and adapter.db_path.exists():
+                query = f"{method.get('method_name') or method.get('class_name')}"
+                retrieved = query_slides(query, adapter.db_path, client)
+                ref_text = "\n\n".join(retrieved)
+
             result = {
                 "status": "runtime_error",
                 "type": h.get("type"),
@@ -151,7 +181,7 @@ def main():
                 "method": method.get("method_name") or method.get("class_name")
             }
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method.get("method_name") or method.get("class_name"))
+            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, method.get("method_name") or method.get("class_name"))
             print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
@@ -159,7 +189,7 @@ def main():
 
 
         result = {"status": "unknown_harness_output", "harness": h, "raw": run}
-        result["feedback"] = generate_feedback(result, source, adapter.name, method["pseudo_code"], method.get("method_name") or method.get("class_name"))
+        result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, method.get("method_name") or method.get("class_name"))
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

@@ -92,6 +92,7 @@ def generate_feedback(
     student_source: str,
     adapter_name: str,
     ref_text: str,
+    attempt: int,
     method_name: str,
 
 ) -> Dict[str, Any]:
@@ -102,7 +103,21 @@ def generate_feedback(
     if len(code) > 4000:
         code = code[:4000] + "\n…(truncated)…"
 
+    if attempt == 1:
+        hint_level = "Give a vague hint only. Point to the relevant concept but do not reveal the fix."
+    elif attempt == 2:
+        hint_level = "Give a more specific hint. Reference the specific pseudocode line that is relevant."
+    elif attempt == 3:
+        hint_level = "Give a detailed explanation of what is wrong and why."
+    else:
+        hint_level = "Give the full solution with a complete explanation."
+        
     prompt = f"""
+
+HINT LEVEL INSTRUCTION (STRICTLY FOLLOW THIS): 
+{hint_level}
+You MUST follow this instruction above all others. Do NOT reveal more than the hint level allows.
+
 You are a TA giving feedback for the method {method_name} in a Java Data Structures assignment.
 
 IMPORTANT:
@@ -119,6 +134,7 @@ Return STRICT JSON with keys:
 Context:
 STATUS: {result.get("status")}
 EVIDENCE: {json.dumps(result, ensure_ascii=False)}
+HINT LEVEL: {hint_level}
 
 Student code:
 {code}

@@ -5,6 +5,7 @@ from scripts.run_compile import compile_java, run_java, read_text, scan_java_sou
 from scripts.ingest_slides import query_slides
 from openai import OpenAI
 import os
+from scripts.attempt_tracker import get_attempt, increment_attempt, reset_attempt
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -28,6 +29,9 @@ def parse_harness_stdout(stdout: str) -> dict:
 
 
 def main():
+
+    student_id = "student_001"  # in real use, get this from the environment or request
+
     MODULE = "M4"  # change to "M_" to grade M4 sorts, "M5" for M5 data structures, etc...
 
     if MODULE == "M4":
@@ -59,13 +63,14 @@ def main():
             timeout_sec=5.0,
         )
 
+
     # 1) pre-run scan
     for file in adapter.student_files:
         source = read_text(str(file))
         scan = scan_java_source(source)
         if scan["status"] != "ok":
             result = {"status": "blocked", "scan": scan}
-            result["feedback"] = generate_feedback(result, source, adapter.name, "N/A", "N/A")
+            result["feedback"] = generate_feedback(result, source, adapter.name, "N/A", 1, "N/A")
             print(json.dumps(result, ensure_ascii=False, indent=2))
             return
         
@@ -77,7 +82,7 @@ def main():
     if c1["status"] != "ok":
         result = {"status": "compile_error", "which": "student", "compile": c1}
 
-        result["feedback"] = generate_feedback(result, source, adapter.name, "N/A", "N/A")
+        result["feedback"] = generate_feedback(result, source, adapter.name, "N/A", 1, "N/A")
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
@@ -100,13 +105,14 @@ def main():
                 query = f"{method.get('method_name') or method.get('class_name')}"
                 retrieved = query_slides(query, adapter.db_path, client)
                 ref_text = "\n\n".join(retrieved)
-                
+
             result = {"status": "compile_error", 
                       "which": "harness", 
                       "compile": c2, 
                       "method": method.get("method_name") or method.get("class_name")}
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, method.get("method_name") or method.get("class_name"))
+            attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
+            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
             print(json.dumps(result, ensure_ascii=False, indent=2))
 
             continue
@@ -114,11 +120,20 @@ def main():
         # 4) run harness
         run = run_java(adapter.harness_main_class(), timeout_sec=adapter.timeout_sec)
         if run["status"] != "ok":
+            increment_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
+                                #retrieve relevant slides
+            ref_text = method.get("pseudo_code", "") #fallback if no pseudo code provided
+            if adapter.db_path and adapter.db_path.exists():
+                query = f"{method.get('method_name') or method.get('class_name')}"
+                retrieved = query_slides(query, adapter.db_path, client)
+                ref_text = "\n\n".join(retrieved)
+
             result = {"status": "runtime_error", 
                       "run": run, 
                       "method": method.get("method_name") or method.get("class_name")}
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, method.get("method_name") or method.get("class_name"))
+            attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
+            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
             print(json.dumps(result, ensure_ascii=False, indent=2))
 
             continue
@@ -130,16 +145,19 @@ def main():
             name = method.get("method_name") or method.get("class_name")
             key = "method" if method.get("method_name") else "class"
             print(json.dumps({"status": "pass", key: name}, ensure_ascii=False))
+            reset_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
 
             continue
 
         if h.get("status") == "fail":
+            increment_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
                     #retrieve relevant slides
             ref_text = method.get("pseudo_code", "") #fallback if no pseudo code provided
             if adapter.db_path and adapter.db_path.exists():
                 query = f"{method.get('method_name') or method.get('class_name')}"
                 retrieved = query_slides(query, adapter.db_path, client)
                 ref_text = "\n\n".join(retrieved)
+                
 
             if method.get("harness_type") == "partition":
                 result = {
@@ -158,8 +176,9 @@ def main():
                     "expected": h.get("expected"),
                     "actual": h.get("actual"),
                 }
-
-            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, method.get("method_name") or method.get("class_name"))
+                
+            attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
+            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
             print(json.dumps(result, ensure_ascii=False))
 
             continue
@@ -171,6 +190,7 @@ def main():
                 query = f"{method.get('method_name') or method.get('class_name')}"
                 retrieved = query_slides(query, adapter.db_path, client)
                 ref_text = "\n\n".join(retrieved)
+            increment_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
 
             result = {
                 "status": "runtime_error",
@@ -181,7 +201,8 @@ def main():
                 "method": method.get("method_name") or method.get("class_name")
             }
 
-            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, method.get("method_name") or method.get("class_name"))
+            attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
+            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
             print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
@@ -189,7 +210,7 @@ def main():
 
 
         result = {"status": "unknown_harness_output", "harness": h, "raw": run}
-        result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, method.get("method_name") or method.get("class_name"))
+        result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

@@ -1,24 +1,26 @@
 # DSA Autograder
 
-An automated grading and feedback system for a Java Data Structures and Algorithms course. Designed to evaluate student code submissions and generate meaningful, assignment-specific feedback powered by an LLM.
+An automated grading and feedback system for programming assignments. Designed to evaluate student code submissions, retrieve relevant course material from lecture slides, and generate adaptive, escalating feedback powered by an LLM. Originally built for a Java Data Structures and Algorithms course, with an architecture designed to generalize across CS courses.
 
 ---
 
 ## Overview
 
-Students submit Java files through Canvas. The autograder compiles and runs each submission against a test harness, then uses the OpenAI API to generate targeted feedback explaining what went wrong and how to fix it — referencing the same pseudocode taught in lecture.
+Students submit Java files through Canvas. The autograder compiles and runs each submission against a test harness, retrieves relevant content from course slides via a vector store, and uses the OpenAI API to generate targeted feedback — escalating from vague hints to full solutions based on how many times the student has attempted the assignment.
 
-The system is modular by design: each course module (sorting algorithms, graph algorithms, dynamic programming, etc.) has its own adapter that defines the methods to test, the test logic, and the reference pseudocode.
+The system is modular by design: each assignment has a config file and an adapter that defines what to test and how. Everything else — slide ingestion, retrieval, feedback generation, attempt tracking — is course-agnostic.
 
 ---
 
 ## How It Works
 
-1. **Security scan** — The student's `.java` file is scanned for banned APIs (filesystem access, networking, `System.exit`, etc.) before anything runs.
-2. **Compilation** — The student's file is compiled with `javac`. Compile errors are caught and fed to the feedback system.
-3. **Harness generation** — A Java test harness is dynamically generated for each method in the assignment. The harness runs the student's method against a set of test cases and compares output to a known correct answer (`Arrays.sort` as oracle for sorting).
-4. **Execution** — The harness is compiled and run with a timeout. Runtime errors and exceptions are caught and reported.
-5. **Feedback generation** — Results (pass/fail/error + evidence) along with the student's source code and lecture pseudocode are sent to an LLM with a structured prompt. The LLM returns a short explanation and concrete next steps in JSON format.
+1. **Slide ingestion (one-time setup)** — Course slides are ingested as a PDF. Each slide is processed by GPT-4o vision to extract text including pseudocode from diagrams, embedded into vectors, and stored in a local Chroma vector database.
+2. **Security scan** — The student's `.java` file is scanned for banned APIs (filesystem access, networking, `System.exit`, etc.) before anything runs.
+3. **Compilation** — The student's file is compiled with `javac`. Compile errors are caught and fed to the feedback system.
+4. **Harness generation** — A Java test harness is dynamically generated for each method in the assignment. The harness runs the student's method against test cases and compares output to a known correct answer.
+5. **Execution** — The harness is compiled and run with a timeout. Runtime errors and exceptions are caught and reported.
+6. **Retrieval** — The student's error is used to query the vector store, retrieving the most relevant slide content to use as context for feedback.
+7. **Adaptive feedback** — The attempt count for this student and method determines the hint level. The LLM returns a short explanation and concrete next steps in JSON format, escalating from vague hints to full solutions across attempts.
 
 ---
 
@@ -27,39 +29,77 @@ The system is modular by design: each course module (sorting algorithms, graph a
 ```
 DSA-autograder/
 ├── adapters/
-│   ├── base.py              # Base adapter class (interface)
-│   └── m4_sorts.py          # Module 4: Insertion Sort, Merge Sort, Quick Sort
+│   ├── base.py                    # Base adapter class (interface)
+│   ├── registry.py                # Adapter registry for dynamic loading
+│   ├── m4_sorts.py                # Module 4: Sorting Algorithms
+│   └── m5_data_structures.py      # Module 5: Stack, Queue, LinkedList, BST
+├── configs/
+│   ├── m4_sorts.json              # Config for M4
+│   └── m5_data_structures.json    # Config for M5
 ├── scripts/
-│   ├── driver.py            # Main entry point
-│   ├── feedback.py          # LLM feedback generation
-│   └── run_compile.py       # Java compile, run, and security scan
+│   ├── driver.py                  # Main entry point
+│   ├── feedback.py                # LLM feedback generation
+│   ├── ingest_slides.py           # Slide ingestion and vector retrieval
+│   ├── attempt_tracker.py         # Per-student attempt tracking
+│   └── run_compile.py             # Java compile, run, and security scan
+├── slides/                        # Course slide PDFs
+├── vector_store/                  # Chroma vector databases (generated)
+├── submissions/                   # Student attempt history (generated)
 ├── harness/
-│   └── Harness.java         # Auto-generated test harness (do not edit)
-└── M4/
-    └── Sort.java            # Student submission (example)
+│   └── Harness.java               # Auto-generated test harness (do not edit)
+├── M4/
+│   └── Sort.java                  # Student submission (example)
+└── M5/                            # Student submission files (example)
 ```
+
+---
+
+## Setup
+
+### Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+Also requires **Poppler** for PDF processing (Windows: download from [poppler-windows](https://github.com/oschwartz10612/poppler-windows/releases) and add `bin/` to PATH).
+
+### Environment Variables
+
+```bash
+set OPENAI_API_KEY=your_key_here   # Windows
+export OPENAI_API_KEY=your_key_here # Mac/Linux
+```
+
+To change the OpenAI model:
+```bash
+set OPENAI_MODEL=gpt-4.1-mini
+```
+
+### Slide Ingestion (one-time per assignment)
+
+```bash
+python -m scripts.ingest_slides
+```
+
+This processes the slides PDF, extracts text via GPT-4o vision, and stores embeddings in the vector store. Only needs to run once per course setup.
 
 ---
 
 ## Running
 
 ```bash
-python -m scripts.driver
+python -m scripts.driver configs/m4_sorts.json
+python -m scripts.driver configs/m5_data_structures.json
 ```
 
-Requires Python 3.9+, Java JDK, and an `OPENAI_API_KEY` environment variable set for feedback generation. Feedback will fall back to a template message if the key is missing.
-
-To change the OpenAI model:
-```bash
-set OPENAI_MODEL=gpt-4.1-mini   # Windows
-export OPENAI_MODEL=gpt-4.1-mini # Mac/Linux
-```
+Defaults to `configs/m4_sorts.json` if no config is specified.
 
 ---
 
 ## Output
 
-Each method in the assignment produces a JSON result:
+Each method or class in the assignment produces a JSON result:
 
 ```json
 {
@@ -79,16 +119,22 @@ Each method in the assignment produces a JSON result:
 
 Possible statuses: `pass`, `fail`, `runtime_error`, `compile_error`, `blocked`, `unknown_harness_output`.
 
+Feedback escalates across attempts:
+- **Attempt 1** — vague hint pointing to the relevant concept
+- **Attempt 2** — more specific, referencing pseudocode
+- **Attempt 3** — detailed explanation of what is wrong
+- **Attempt 4+** — full solution with explanation
+
 ---
 
-## Adding a New Module
+## Adding a New Assignment
 
-1. Create `adapters/mX_name.py` with a class extending `Adapter`
-2. Implement `methods()` — return a list of method dicts with `method_name`, `pseudo_code`, `call_args`, and optionally `harness_type`
-3. Implement `write_harness()` — or rely on the default `_sort_main()` for standard sorting methods
-4. Import and instantiate your adapter in `driver.py`
-
-For methods that are helpers rather than standalone sorts (e.g. `merge`, `partition`), set `harness_type` to `"merge"` or `"partition"` to use custom harness logic.
+1. Create a config file in `configs/` — copy an existing one and update the fields
+2. Create `adapters/mX_name.py` with a class extending `Adapter`
+3. Implement `methods()` and `write_harness()`
+4. Add the adapter to `adapters/registry.py`
+5. Run slide ingestion for the new assignment's PDF
+6. Run with `python -m scripts.driver configs/your_config.json`
 
 ---
 
@@ -103,8 +149,8 @@ For methods that are helpers rather than standalone sorts (e.g. `merge`, `partit
 
 ## Planned Features
 
-- **Canvas integration** — automatically pull student submissions from Canvas via API
-- **Batch grading** — run the autograder across an entire class roster and aggregate results
-- **Auto-routing** — detect which module a submission belongs to based on class/method names
-- **Result export** — output grades and feedback as CSV or push directly back to Canvas gradebook
-- **Extended module coverage** — graph algorithms (BFS, Dijkstra, Bellman-Ford), dynamic programming, search trees, and other DSA topics
+- **Canvas integration** — automatically pull student submissions and push feedback/grades back
+- **Batch grading** — grade an entire class roster in one run
+- **Auto-routing** — detect which assignment a submission belongs to automatically
+- **Non-programming assignment support** — extend to courses beyond programming (discrete math, theory, etc.)
+- **Extended module coverage** — graph algorithms (BFS, Dijkstra, Bellman-Ford), dynamic programming, and more

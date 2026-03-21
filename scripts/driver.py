@@ -6,6 +6,8 @@ from scripts.ingest_slides import query_slides
 from openai import OpenAI
 import os
 from scripts.attempt_tracker import get_attempt, increment_attempt, reset_attempt
+import sys
+
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -32,37 +34,23 @@ def main():
 
     student_id = "student_001"  # in real use, get this from the environment or request
 
-    MODULE = "M4"  # change to "M_" to grade M4 sorts, "M5" for M5 data structures, etc...
+    #load config
+    config_path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("configs/m4_sorts.json")
+    with open(config_path, "r") as f:
+        config = json.load(f)
 
-    if MODULE == "M4":
-        from adapters.m4_sorts import M4SortsAdapter
-        adapter = M4SortsAdapter(
-            name="M4 Sorts",
-            module="M4",
-            student_files=[Path("M4/Sort.java")],
-            package="M4",
-            student_class="Sort",
-            timeout_sec=5.0,
-            db_path=Path("vector_store/dsa_m4")
-        )
-    elif MODULE == "M5":
-        from adapters.m5_data_structures import M5DataStructuresAdapter
-        adapter = M5DataStructuresAdapter(
-            name="M5 Data Structures",
-            module="M5",
-            student_files=[
-                Path("M5/Stack.java"),
-                Path("M5/Queue.java"),
-                Path("M5/ListNode.java"),
-                Path("M5/LinkedList.java"),
-                Path("M5/TreeNode.java"),
-                Path("M5/BinarySearchTree.java"),
-            ],
-            package="M5",
-            student_class="",
-            timeout_sec=5.0,
-        )
-
+    #load adapter from registry
+    from adapters.registry import REGISTRY
+    adapter_class = REGISTRY[config["adapter"]]
+    adapter = adapter_class(
+        name=config["name"],
+        module=config["module"],
+        student_files=[Path(f) for f in config["student_files"]],
+        package=config["package"],
+        student_class=config["student_class"],
+        timeout_sec=config["timeout_sec"],
+        db_path=Path(config["db_path"])
+    )
 
     # 1) pre-run scan
     for file in adapter.student_files:

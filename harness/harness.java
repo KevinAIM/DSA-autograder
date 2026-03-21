@@ -1,63 +1,77 @@
 package harness;
 
-import java.util.Arrays;
-import M4.Sort;
-import java.io.StringWriter;
-import java.io.PrintWriter;
+import M5.Stack;
+import M5.Queue;
+import M5.LinkedList;
+import M5.ListNode;
+import M5.TreeNode;
+import M5.BinarySearchTree;
 
 public class Harness {
-
-    static boolean arraysEqual(int[] a, int[] b) {
-        return Arrays.equals(a, b);
-    }
-
-    static String arrToString(int[] a) {
-        return Arrays.toString(a);
-    }
-
     public static void main(String[] args) {
-                    Sort obj = new Sort();
-            int[][] tests = new int[][] {
-                new int[] {2, 1},
-                new int[] {3, 2, 1},
-                new int[] {1, 2, 3},
-                new int[] {5, 1, 4, 2, 8},
-                new int[] {2, 2, 1, 1},
-                new int[] {0, -1, 5, -3, 2}
-            };
+        
+BinarySearchTree bst = new BinarySearchTree();
+int[] keys = {15, 6, 18, 3, 7, 17, 20, 2, 4, 13, 9};
 
-            for (int i = 0; i < tests.length; i++) {
-                int[] input = Arrays.copyOf(tests[i], tests[i].length);
-                int[] actual = Arrays.copyOf(tests[i], tests[i].length);
+// test insert - build the tree
+for (int k : keys) {
+    bst.insert(k);
+}
 
-                try {
-                    int q = obj.partition(actual, 0, actual.length - 1);
+if (bst.root == null || bst.root.key != 15) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"BinarySearchTree\",\"reason\":\"insert() failed, root should be 15\"}");
+    return;
+}
 
-                    // check left side <= pivot
-                    for (int k = 0; k < q; k++) {
-                        if (actual[k] > actual[q]) {
-                            System.out.println("{\"status\":\"fail\",\"testIndex\":" + i
-                                + ",\"reason\":\"left element > pivot\""
-                                + ",\"input\":\"" + Arrays.toString(input) + "\"}");
-                            return;
-                        }
-                    }
-                    // check right side >= pivot
-                    for (int k = q + 1; k < actual.length; k++) {
-                        if (actual[k] < actual[q]) {
-                            System.out.println("{\"status\":\"fail\",\"testIndex\":" + i
-                                + ",\"reason\":\"right element < pivot\""
-                                + ",\"input\":\"" + Arrays.toString(input) + "\"}");
-                            return;
-                        }
-                    }
+// test inorder_tree_walk - should print sorted order
+java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+java.io.PrintStream ps = new java.io.PrintStream(baos);
+System.setOut(ps);
+bst.inorder_tree_walk(bst.root);
+System.setOut(new java.io.PrintStream(new java.io.FileOutputStream(java.io.FileDescriptor.out)));
+String walkOutput = baos.toString().trim().replaceAll("\\s+", " ");
+if (!walkOutput.equals("2 3 4 6 7 9 13 15 17 18 20")) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"BinarySearchTree\",\"reason\":\"inorder_tree_walk() failed, got \" + walkOutput}");
+    return;
+}
 
-                } catch (Throwable t) {
-                    System.out.println("{\"status\":\"error\",\"testIndex\":" + i
-                        + ",\"exception\":\"" + t.toString().replace("\"", "\\\"") + "\"}");
-                    return;
-                }
-            }
-            System.out.println("{\"status\":\"pass\",\"tests\":" + tests.length + "}");
+// test search
+TreeNode found = bst.search(bst.root, 13);
+if (found == null || found.key != 13) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"BinarySearchTree\",\"reason\":\"search(13) failed\"}");
+    return;
+}
+
+// test iterative_search
+TreeNode iFound = bst.iterative_search(4);
+if (iFound == null || iFound.key != 4) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"BinarySearchTree\",\"reason\":\"iterative_search(4) failed\"}");
+    return;
+}
+
+// test minimum
+TreeNode min = bst.minimum();
+if (min == null || min.key != 2) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"BinarySearchTree\",\"reason\":\"minimum() should return 2, got \" + (min == null ? \"null\" : min.key)}");
+    return;
+}
+
+// test maximum
+TreeNode max = bst.maximum();
+if (max == null || max.key != 20) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"BinarySearchTree\",\"reason\":\"maximum() should return 20, got \" + (max == null ? \"null\" : max.key)}");
+    return;
+}
+
+// test successor - successor of 13 should be 15
+TreeNode node13 = bst.search(bst.root, 13);
+TreeNode succ = bst.successor(node13);
+if (succ == null || succ.key != 15) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"BinarySearchTree\",\"reason\":\"successor(13) should be 15, got \" + (succ == null ? \"null\" : succ.key)}");
+    return;
+}
+
+System.out.println("{\"status\":\"pass\",\"class\":\"BinarySearchTree\"}");
+
     }
 }

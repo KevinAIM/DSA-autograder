@@ -4,3 +4,4 @@ __pycache__/
 vector_store/
 slides/*_extracted.json
 .vscode/
+submissions/

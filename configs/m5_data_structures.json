@@ -1,0 +1,11 @@
+{
+  "name": "M5 Data Structures",
+  "module": "M5",
+  "adapter": "M5DataStructuresAdapter",
+  "student_files": ["M5/Stack.java", "M5/Queue.java", "M5/ListNode.java", "M5/LinkedList.java", "M5/TreeNode.java", "M5/BinarySearchTree.java"],
+  "db_path": "vector_store/dsa_m5",
+  "slides_pdf": "slides/CSITBG2 Module 5.pdf",
+  "package": "M5",
+  "student_class": "",
+  "timeout_sec": 5.0
+}

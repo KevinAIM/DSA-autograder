@@ -40,7 +40,7 @@ DEQUEUE(Q):
         Q.head = Q.head + 1
     return x
 """},
-                {"class_name": "linkedList", "harness_type": "linkedlist", "pseudo_code": """
+                {"class_name": "LinkedList", "harness_type": "linkedlist", "pseudo_code": """
 LIST-SEARCH(L, k):
     x = L.head                          // start from head
     while x != NIL and x.key != k:     // traverse until found or end

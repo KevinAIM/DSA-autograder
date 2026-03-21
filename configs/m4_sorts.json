@@ -1,0 +1,11 @@
+{
+  "name": "M4 Sorting Algorithms",
+  "module": "M4",
+  "adapter": "M4SortsAdapter",
+  "student_files": ["M4/Sort.java"],
+  "db_path": "vector_store/dsa_m4",
+  "slides_pdf": "slides/CSITBG2 Module 4.pdf",
+  "package": "M4",
+  "student_class": "Sort",
+  "timeout_sec": 5.0
+}

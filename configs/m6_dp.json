@@ -1,0 +1,11 @@
+{
+  "name": "M6 Dynamic Programming",
+  "module": "M6",
+  "adapter": "M6DynamicProgrammingAdapter",
+  "student_files": ["M6/RodCut.java", "M6/LCS.java"],
+  "db_path": "vector_store/dsa_m6",
+  "slides_pdf": "slides/CSITBG2 Module 6.pdf",
+  "package": "M6",
+  "student_class": "",
+  "timeout_sec": 5.0
+}

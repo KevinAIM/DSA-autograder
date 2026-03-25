@@ -87,7 +87,7 @@ def main():
 
         c2 = compile_java(str(harness_path))
         if c2["status"] != "ok":
-                        #retrieve relevant slides
+                        #retrieve relevant slidesd
             ref_text = method.get("pseudo_code", "") #fallback if no pseudo code provided
             if adapter.db_path and adapter.db_path.exists():
                 query = f"{method.get('method_name') or method.get('class_name')}"
@@ -198,8 +198,9 @@ def main():
 
 
         result = {"status": "unknown_harness_output", "harness": h, "raw": run}
+        ref_text = method.get("pseudo_code", "")
+        attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
         result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
-        print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

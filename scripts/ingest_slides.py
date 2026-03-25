@@ -1,6 +1,7 @@
 import os
 import base64
 from pathlib import Path
+import sys
 from pdf2image import convert_from_path
 from openai import OpenAI
 import chromadb
@@ -36,6 +37,7 @@ def extract_text_from_image(image, client: OpenAI) -> str:
         ]
     )
     return response.choices[0].message.content
+
 
 def embed_and_store(slide_texts: list, db_path: Path, client: OpenAI) -> None:
     # create chroma client and collection
@@ -88,9 +90,13 @@ def query_slides(query: str, db_path: Path, client: OpenAI, n_results: int = 3) 
     return results["documents"][0]
 
 def main():
-    slides_path = Path("slides/CSITBG2 Module 4.pdf")
-    db_path = Path("vector_store/dsa_m4")
-    extracted_path = Path("slides/CSITBG2 Module 4_extracted.json")
+    config_path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("configs/m4_sorts.json")
+    with open(config_path, "r") as f:
+        config = json.load(f)
+    
+    slides_path = Path(config["slides_pdf"])
+    db_path = Path(config["db_path"])
+    extracted_path = slides_path.with_suffix("").parent / (slides_path.stem + "_extracted.json")
     
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -112,12 +118,12 @@ def main():
 
     print(f"Loaded {len(slide_texts)} slides")
 
-    embed_and_store(slide_texts, db_path, client)
-
-    results = query_slides("insertion sort pseudocode", db_path, client)
-    for r in results:
-        print("---")
-        print(r[:300]) #print first 300 chars of each result
+    chroma_client = chromadb.PersistentClient(path=str(db_path))
+    collection = chroma_client.get_or_create_collection(name="slides")
+    if collection.count() > 0:
+        print(f"Vector store already populated with {collection.count()} slides, skipping embedding.")
+    else:
+        embed_and_store(slide_texts, db_path, client)
 
 if __name__ == "__main__":
     main()

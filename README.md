@@ -29,27 +29,32 @@ The system is modular by design: each assignment has a config file and an adapte
 ```
 DSA-autograder/
 ├── adapters/
-│   ├── base.py                    # Base adapter class (interface)
-│   ├── registry.py                # Adapter registry for dynamic loading
-│   ├── m4_sorts.py                # Module 4: Sorting Algorithms
-│   └── m5_data_structures.py      # Module 5: Stack, Queue, LinkedList, BST
+│   ├── base.py                        # Base adapter class (interface)
+│   ├── registry.py                    # Adapter registry for dynamic loading
+│   ├── m4_sorts.py                    # Module 4: Sorting Algorithms
+│   ├── m5_data_structures.py          # Module 5: Stack, Queue, LinkedList, BST
+│   ├── m6_dynamic_programming.py      # Module 6: Rod Cutting, LCS
+│   └── m7_graphs.py                   # Module 7: BFS, Bellman-Ford, Dijkstra
 ├── configs/
-│   ├── m4_sorts.json              # Config for M4
-│   └── m5_data_structures.json    # Config for M5
+│   ├── m4_sorts.json                  # Config for M4
+│   ├── m5_data_structures.json        # Config for M5
+│   ├── m6_dp.json                     # Config for M6
+│   └── m7_graphs.json                 # Config for M7
 ├── scripts/
-│   ├── driver.py                  # Main entry point
-│   ├── feedback.py                # LLM feedback generation
-│   ├── ingest_slides.py           # Slide ingestion and vector retrieval
-│   ├── attempt_tracker.py         # Per-student attempt tracking
-│   └── run_compile.py             # Java compile, run, and security scan
-├── slides/                        # Course slide PDFs
-├── vector_store/                  # Chroma vector databases (generated)
-├── submissions/                   # Student attempt history (generated)
+│   ├── driver.py                      # Main entry point
+│   ├── feedback.py                    # LLM feedback generation
+│   ├── ingest_slides.py               # Slide ingestion and vector retrieval
+│   ├── attempt_tracker.py             # Per-student attempt tracking
+│   └── run_compile.py                 # Java compile, run, and security scan
+├── slides/                            # Course slide PDFs
+├── vector_store/                      # Chroma vector databases (generated)
+├── submissions/                       # Student attempt history (generated)
 ├── harness/
-│   └── Harness.java               # Auto-generated test harness (do not edit)
-├── M4/
-│   └── Sort.java                  # Student submission (example)
-└── M5/                            # Student submission files (example)
+│   └── Harness.java                   # Auto-generated test harness (do not edit)
+├── M4/                                # Student submission files (example)
+├── M5/                                # Student submission files (example)
+├── M6/                                # Student submission files (example)
+└── M7/                                # Student submission files (example)
 ```
 
 ---
@@ -79,10 +84,13 @@ set OPENAI_MODEL=gpt-4.1-mini
 ### Slide Ingestion (one-time per assignment)
 
 ```bash
-python -m scripts.ingest_slides
+python -m scripts.ingest_slides configs/m4_sorts.json
+python -m scripts.ingest_slides configs/m5_data_structures.json
+python -m scripts.ingest_slides configs/m6_dp.json
+python -m scripts.ingest_slides configs/m7_graphs.json
 ```
 
-This processes the slides PDF, extracts text via GPT-4o vision, and stores embeddings in the vector store. Only needs to run once per course setup.
+This processes each slide PDF, extracts text via GPT-4o vision, and stores embeddings in the vector store. Only needs to run once per assignment setup.
 
 ---
 
@@ -91,6 +99,8 @@ This processes the slides PDF, extracts text via GPT-4o vision, and stores embed
 ```bash
 python -m scripts.driver configs/m4_sorts.json
 python -m scripts.driver configs/m5_data_structures.json
+python -m scripts.driver configs/m6_dp.json
+python -m scripts.driver configs/m7_graphs.json
 ```
 
 Defaults to `configs/m4_sorts.json` if no config is specified.
@@ -140,10 +150,12 @@ Feedback escalates across attempts:
 
 ## Modules Covered
 
-| Module | Assignment | Methods |
-|--------|------------|---------|
+| Module | Assignment | Classes/Methods |
+|--------|------------|-----------------|
 | M4 | Sorting Algorithms | `insertionSort`, `merge_sort`, `merge`, `quick_sort`, `partition` |
 | M5 | Basic Data Structures | `Stack` (empty, push, pop), `Queue` (enqueue, dequeue), `LinkedList` (insert, search, delete), `BinarySearchTree` (insert, inorder_tree_walk, search, iterative_search, minimum, maximum, successor) |
+| M6 | Dynamic Programming | `RodCut` (memoized_cut_rod, bottom_up_cut_rod, extended_bottom_up_cut_rod), `LCS` (lcs_length) |
+| M7 | Graph Algorithms | `Graph` (bfs, bellman_ford, dijkstra) |
 
 ---
 
@@ -152,5 +164,6 @@ Feedback escalates across attempts:
 - **Canvas integration** — automatically pull student submissions and push feedback/grades back
 - **Batch grading** — grade an entire class roster in one run
 - **Auto-routing** — detect which assignment a submission belongs to automatically
+- **Level 1 harness generation** — professor specifies test cases in config file, system generates harness automatically
 - **Non-programming assignment support** — extend to courses beyond programming (discrete math, theory, etc.)
-- **Extended module coverage** — graph algorithms (BFS, Dijkstra, Bellman-Ford), dynamic programming, and more
+- **Course agnostic expansion** — support any CS course with slides and assignments, not just DSA

@@ -1,0 +1,11 @@
+{
+  "name": "M7 Graph Algorithms",
+  "module": "M7",
+  "adapter": "M7GraphsAdapter",
+  "student_files": ["M7/Graph.java"],
+  "db_path": "vector_store/dsa_m7",
+  "slides_pdf": "slides/CSITBG2 Module 7.pdf",
+  "package": "M7",
+  "student_class": "Graph",
+  "timeout_sec": 5.0
+}

@@ -7,6 +7,7 @@ from openai import OpenAI
 import os
 from scripts.attempt_tracker import get_attempt, increment_attempt, reset_attempt
 import sys
+from scripts.formatter import format_output
 
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -59,7 +60,7 @@ def main():
         if scan["status"] != "ok":
             result = {"status": "blocked", "scan": scan}
             result["feedback"] = generate_feedback(result, source, adapter.name, "N/A", 1, "N/A")
-            print(json.dumps(result, ensure_ascii=False, indent=2))
+            format_output(result)
             return
         
     source = "\n".join(read_text(str(f)) for f in adapter.student_files)
@@ -71,7 +72,7 @@ def main():
         result = {"status": "compile_error", "which": "student", "compile": c1}
 
         result["feedback"] = generate_feedback(result, source, adapter.name, "N/A", 1, "N/A")
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        format_output(result)
 
 
         return
@@ -101,7 +102,7 @@ def main():
 
             attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
             result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
-            print(json.dumps(result, ensure_ascii=False, indent=2))
+            format_output(result)
 
             continue
 
@@ -122,7 +123,7 @@ def main():
 
             attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
             result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
-            print(json.dumps(result, ensure_ascii=False, indent=2))
+            format_output(result)
 
             continue
 
@@ -132,7 +133,7 @@ def main():
         if h.get("status") == "pass":
             name = method.get("method_name") or method.get("class_name")
             key = "method" if method.get("method_name") else "class"
-            print(json.dumps({"status": "pass", key: name}, ensure_ascii=False))
+            format_output({"status": "pass", key: name})
             reset_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
 
             continue
@@ -161,9 +162,9 @@ def main():
             if h.get("reason") is not None:
                 result["reason"] = h.get("reason")
 
-            attempt = get_attempt(...)
-            result["feedback"] = generate_feedback(...)
-            print(json.dumps(result, ensure_ascii=False))
+            attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
+            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
+            format_output(result)
             
             continue
         
@@ -187,17 +188,18 @@ def main():
 
             attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
             result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
-            print(json.dumps(result, ensure_ascii=False, indent=2))
+            format_output(result)
 
 
             continue
 
 
         result = {"status": "unknown_harness_output", "harness": h, "raw": run}
+
         ref_text = method.get("pseudo_code", "")
         attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
         result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
-
+        format_output(result)
 
 if __name__ == "__main__":
     main()

@@ -139,36 +139,32 @@ def main():
 
         if h.get("status") == "fail":
             increment_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
-                    #retrieve relevant slides
-            ref_text = method.get("pseudo_code", "") #fallback if no pseudo code provided
+            # retrieve relevant slides
+            ref_text = method.get("pseudo_code", "")
             if adapter.db_path and adapter.db_path.exists():
                 query = f"{method.get('method_name') or method.get('class_name')}"
                 retrieved = query_slides(query, adapter.db_path, client)
                 ref_text = "\n\n".join(retrieved)
-                
 
-            if method.get("harness_type") == "partition":
-                result = {
-                    "status": "fail",
-                    "method": method.get("method_name") or method.get("class_name"),
-                    "testIndex": h.get("testIndex"),
-                    "reason": h.get("reason"),  # partition uses "reason" not expected/actual
-                    "input": h.get("input"),
-                }
-            else:
-                result = {
-                    "status": "fail",
-                    "method": method.get("method_name") or method.get("class_name"),
-                    "testIndex": h.get("testIndex"),
-                    "input": h.get("input"),
-                    "expected": h.get("expected"),
-                    "actual": h.get("actual"),
-                }
-                
-            attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
-            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
+            result = {
+                "status": "fail",
+                "method": method.get("method_name") or method.get("class_name"),
+            }
+            if h.get("testIndex") is not None:
+                result["testIndex"] = h.get("testIndex")
+            if h.get("input") is not None:
+                result["input"] = h.get("input")
+            if h.get("expected") is not None:
+                result["expected"] = h.get("expected")
+            if h.get("actual") is not None:
+                result["actual"] = h.get("actual")
+            if h.get("reason") is not None:
+                result["reason"] = h.get("reason")
+
+            attempt = get_attempt(...)
+            result["feedback"] = generate_feedback(...)
             print(json.dumps(result, ensure_ascii=False))
-
+            
             continue
         
         if h.get("status") == "error":

@@ -93,7 +93,7 @@ def main():
             if adapter.db_path and adapter.db_path.exists():
                 query = f"{method.get('method_name') or method.get('class_name')}"
                 retrieved = query_slides(query, adapter.db_path, client)
-                ref_text = "\n\n".join(retrieved)
+                ref_text = "\n\n".join([f"Slide {r['slide']}] {r['text']}" for r in retrieved])
 
             result = {"status": "compile_error", 
                       "which": "harness", 
@@ -115,7 +115,7 @@ def main():
             if adapter.db_path and adapter.db_path.exists():
                 query = f"{method.get('method_name') or method.get('class_name')}"
                 retrieved = query_slides(query, adapter.db_path, client)
-                ref_text = "\n\n".join(retrieved)
+                ref_text = "\n\n".join([f"Slide {r['slide']}] {r['text']}" for r in retrieved])
 
             result = {"status": "runtime_error", 
                       "run": run, 
@@ -145,7 +145,7 @@ def main():
             if adapter.db_path and adapter.db_path.exists():
                 query = f"{method.get('method_name') or method.get('class_name')}"
                 retrieved = query_slides(query, adapter.db_path, client)
-                ref_text = "\n\n".join(retrieved)
+                ref_text = "\n\n".join([f"Slide {r['slide']}] {r['text']}" for r in retrieved])
 
             result = {
                 "status": "fail",
@@ -174,7 +174,7 @@ def main():
             if adapter.db_path and adapter.db_path.exists():
                 query = f"{method.get('method_name') or method.get('class_name')}"
                 retrieved = query_slides(query, adapter.db_path, client)
-                ref_text = "\n\n".join(retrieved)
+                ref_text = "\n\n".join([f"Slide {r['slide']}] {r['text']}" for r in retrieved])
             increment_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
 
             result = {

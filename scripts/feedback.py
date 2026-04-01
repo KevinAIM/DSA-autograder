@@ -125,6 +125,11 @@ IMPORTANT:
 - Do NOT mention merge sort, quick sort, or other algorithms unless they are directly part of this method.
 - Focus only on the runtime error or failing test provided.
 - Be precise and avoid generic algorithm summaries.
+- When referencing pseudocode or concepts from the slides, always cite the specific slide number using the format "See Slide X".
+- Only cite slides when the error is directly related to the pseudocode or algorithm logic, not for syntax errors.
+- Use the slide content provided below as your primary reference — do not rely on general knowledge of the algorithm.
+- For hint level 2 and above, reference the specific line number of the pseudocode that is relevant, e.g. "See Slide 6, line 8: A[i + 1] = key".
+- Quote the exact pseudocode line when it directly shows what the student should be doing.
 
 Return STRICT JSON with keys:
 - short_explanation: string (2-4 sentences)

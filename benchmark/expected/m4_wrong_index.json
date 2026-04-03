@@ -1,0 +1,7 @@
+{
+  "insertionSort": "runtime_error",
+  "merge_sort": "pass",
+  "merge": "pass",
+  "quick_sort": "pass",
+  "partition": "pass"
+}

@@ -12,7 +12,7 @@ public static int[] insertionSort (int[] array) {
         int key = array[j];
         int i = j - 1;
 
-        while (i >= 0 && array[i] > key) {
+        while (i >= 0 && array[i] >= key) {  // should be array[i] > key
             array[i + 1] = array[i];
             i--;
         }

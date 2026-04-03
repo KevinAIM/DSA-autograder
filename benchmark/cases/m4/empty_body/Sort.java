@@ -5,78 +5,25 @@ import java.util.*;
 public class Sort {
 	
 	
-public static int[] insertionSort (int[] array) {
-    if (array == null) return null;
-
-    for (int j = 1; j < array.length; j++) {
-        int key = array[j];
-        int i = j - 1;
-
-        while (i >= 0 && array[i] > key) {
-            array[i + 1] = array[i];
-            i--;
-        }
-
-        array[i + 1] = key;
-    }
-
+public static int[] insertionSort(int[] array) {
     return array;
+}
 
+public int[] merge_sort(int[] array, int p, int r) {
+    return array;
+}
 
-	}
-	
-	public int[] merge_sort (int[] array, int p, int r) {
-		if (p < r) {
-			int q = (p + r) / 2;
-			merge_sort(array, p, q);
-			merge_sort(array, q + 1, r);
-			merge(array, p, q, r);
-		}
-		return array;
-	}
-	
-	public int[] merge (int[] array, int p, int q, int r) {
-	    int n1 = q - p + 1;
-		int n2 = r - q;
-		int[] L = new int[n1];
-		int[] R = new int[n2];
-		for (int i = 0; i < n1; i++) L[i] = array[p + i];
-		for (int j = 0; j < n2; j++) R[j] = array[q + 1 + j];
-		int i = 0, j = 0, k = p;
-		while (i < n1 && j < n2) {
-			if (L[i] <= R[j]) array[k++] = L[i++];
-			else array[k++] = R[j++];
-		}
-		while (i < n1) array[k++] = L[i++];
-		while (j < n2) array[k++] = R[j++];
-		return array;
-	}
-	
-	public int[] quick_sort (int[] array, int p, int r) {
-		if (p < r) {
-			int q = partition(array, p, r);
-			quick_sort(array, p, q - 1);
-			quick_sort(array, q + 1, r);
-		}
-		return array;
-	}
-	
-	public int partition (int[] array, int p, int r) {
-		int x = array[r];
-		int i = p - 1;
-		for (int j = p; j < r; j++) {
-			if (array[j] <= x) {
-				i++;
-				int temp = array[i];
-				array[i] = array[j];
-				array[j] = temp;
-			}
-		}
-		int temp = array[i + 1];
-		array[i + 1] = array[r];
-		array[r] = temp;
-		return i + 1;
-	}
+public int[] merge(int[] array, int p, int q, int r) {
+    return array;
+}
+
+public int[] quick_sort(int[] array, int p, int r) {
+    return array;
+}
+
+public int partition(int[] array, int p, int r) {
+    return 0;
+}
 	
 	
 	/*

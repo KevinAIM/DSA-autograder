@@ -8,7 +8,7 @@ public class Sort {
 public static int[] insertionSort (int[] array) {
     if (array == null) return null;
 
-    for (int j = 1; j < array.length; j++) {
+    for (int j = 0; j < array.length; j++) {  // should be j = 1
         int key = array[j];
         int i = j - 1;
 

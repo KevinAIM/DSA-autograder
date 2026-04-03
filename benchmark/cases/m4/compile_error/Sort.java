@@ -5,8 +5,8 @@ import java.util.*;
 public class Sort {
 	
 	
-public static int[] insertionSort (int[] array) {
-    if (array == null) return null;
+public static int[] insertionSort(int[] array) {
+    if (array == null) return null
 
     for (int j = 1; j < array.length; j++) {
         int key = array[j];

@@ -1,0 +1,6 @@
+{
+  "Stack": "fail",
+  "Queue": "pass",
+  "LinkedList": "pass",
+  "BinarySearchTree": "pass"
+}

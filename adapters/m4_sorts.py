@@ -184,16 +184,18 @@ public class Harness {{
         {self.student_class} obj = new {self.student_class}();
     // test loop below...
     // Define a small but useful test set (can expand later)
-    int[][] tests = new int[][] {{
-        new int[] {{}},
-        new int[] {{1}},
-        new int[] {{2, 1}},
-        new int[] {{3, 2, 1}},
-        new int[] {{1, 2, 3}},
-        new int[] {{5, 1, 4, 2, 8}},
-        new int[] {{2, 2, 1, 1}},
-        new int[] {{0, -1, 5, -3, 2}}
-    }};
+        int[][] tests = new int[][] {{
+            new int[] {{}},
+            new int[] {{1}},
+            new int[] {{2, 1}},
+            new int[] {{3, 2, 1}},
+            new int[] {{1, 2, 3}},
+            new int[] {{5, 1, 4, 2, 8}},
+            new int[] {{2, 2, 1, 1}},
+            new int[] {{0, -1, 5, -3, 2}},
+            new int[] {{3, 3, 1}},
+            new int[] {{3, 1, 2}}
+        }};
 
     for (int i = 0; i < tests.length; i++) {{
         int[] input = Arrays.copyOf(tests[i], tests[i].length);

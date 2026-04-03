@@ -1,63 +1,52 @@
 package harness;
 
-import java.util.Arrays;
-import M4.Sort;
-import java.io.StringWriter;
-import java.io.PrintWriter;
+import M5.Stack;
+import M5.Queue;
+import M5.LinkedList;
+import M5.ListNode;
+import M5.TreeNode;
+import M5.BinarySearchTree;
 
 public class Harness {
-
-    static boolean arraysEqual(int[] a, int[] b) {
-        return Arrays.equals(a, b);
-    }
-
-    static String arrToString(int[] a) {
-        return Arrays.toString(a);
-    }
-
     public static void main(String[] args) {
-                    Sort obj = new Sort();
-            int[][] tests = new int[][] {
-                new int[] {2, 1},
-                new int[] {3, 2, 1},
-                new int[] {1, 2, 3},
-                new int[] {5, 1, 4, 2, 8},
-                new int[] {2, 2, 1, 1},
-                new int[] {0, -1, 5, -3, 2}
-            };
+        
+LinkedList l = new LinkedList();
 
-            for (int i = 0; i < tests.length; i++) {
-                int[] input = Arrays.copyOf(tests[i], tests[i].length);
-                int[] actual = Arrays.copyOf(tests[i], tests[i].length);
+// test insert - inserts at front so order is reversed
+l.insert(1);
+l.insert(2);
+l.insert(3);
 
-                try {
-                    int q = obj.partition(actual, 0, actual.length - 1);
+// test toString to verify structure
+String listStr = l.toString();
+if (!listStr.equals("[3,2,1,]")) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"LinkedList\",\"reason\":\"insert() failed, expected [3,2,1,] got \" + listStr}");
+    return;
+}
 
-                    // check left side <= pivot
-                    for (int k = 0; k < q; k++) {
-                        if (actual[k] > actual[q]) {
-                            System.out.println("{\"status\":\"fail\",\"testIndex\":" + i
-                                + ",\"reason\":\"left element > pivot\""
-                                + ",\"input\":\"" + Arrays.toString(input) + "\"}");
-                            return;
-                        }
-                    }
-                    // check right side >= pivot
-                    for (int k = q + 1; k < actual.length; k++) {
-                        if (actual[k] < actual[q]) {
-                            System.out.println("{\"status\":\"fail\",\"testIndex\":" + i
-                                + ",\"reason\":\"right element < pivot\""
-                                + ",\"input\":\"" + Arrays.toString(input) + "\"}");
-                            return;
-                        }
-                    }
+// test search - should find existing node
+ListNode found = l.search(2);
+if (found == null || found.key != 2) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"LinkedList\",\"reason\":\"search(2) failed, expected node with key 2\"}");
+    return;
+}
 
-                } catch (Throwable t) {
-                    System.out.println("{\"status\":\"error\",\"testIndex\":" + i
-                        + ",\"exception\":\"" + t.toString().replace("\"", "\\\"") + "\"}");
-                    return;
-                }
-            }
-            System.out.println("{\"status\":\"pass\",\"tests\":" + tests.length + "}");
+// test search - should return null for missing key
+ListNode notFound = l.search(99);
+if (notFound != null) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"LinkedList\",\"reason\":\"search(99) should return null\"}");
+    return;
+}
+
+// test delete - remove middle node
+l.delete(found);
+String afterDelete = l.toString();
+if (!afterDelete.equals("[3,1,]")) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"LinkedList\",\"reason\":\"delete() failed, expected [3,1,] got \" + afterDelete}");
+    return;
+}
+
+System.out.println("{\"status\":\"pass\",\"class\":\"LinkedList\"}");
+
     }
 }

@@ -1,5 +1,5 @@
 {
-  "Stack": "fail",
+  "Stack": "runtime_error",
   "Queue": "pass",
   "LinkedList": "pass",
   "BinarySearchTree": "pass"

@@ -24,18 +24,18 @@ public class Queue {
 	/*
 	 * Implement the ENQUEUE(Q, x) function
 	 */
-	public void enqueue (int x) {
-	    tail = (tail + 1) % size;	//increments first
-        array[tail] = x;	 		//then stores - wrong order
+	public void enqueue(int x) {
+		tail = (tail + 1) % size;
+		array[tail] = x;
 	}
 	
 	/*
 	 * Implement the DEQUEUE(Q) function
 	 */
-	public int dequeue () {
-		int val = array[head];
-        head = (head + 1) % size;
-        return val;
+	public int dequeue() {
+		int x = array[tail];  // should be array[head], returns wrong element
+		head = (head + 1) % size;
+		return x;
 	}
 	
 	/*

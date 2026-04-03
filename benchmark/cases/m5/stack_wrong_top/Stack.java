@@ -27,21 +27,19 @@ public class Stack {
 	/*
 	 * Implement the Push(S, x) function
 	 */
-	public void push (int x) {
-		array[top] = x; //assigns before incrementing
-        top = top + 1;
+	public void push(int x) {
+		top = top + 1;
+		array[top] = x;
 	}
 	
 	/*
 	 * Implement the Pop(S) function
 	 * Return -1 if the stack is empty
 	 */
-	public int pop () {
-		if (empty()) return -1;
-        int val = array[top];
-        top = top - 1;
-        return val;
-	}   
+	public int pop() {
+		top = top - 1;
+		return array[top + 1];  // off by one, returns wrong element
+	}
 	
 	/*
 	 * Convert stack to string in the format of #size, [#elements]

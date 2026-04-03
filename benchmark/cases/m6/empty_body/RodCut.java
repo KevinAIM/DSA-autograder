@@ -35,7 +35,7 @@ public class RodCut {
     }
 
     public void extended_bottom_up_cut_rod() {
-        return 0;
+        return;
     }
 	
 	public void print_cut_rod_solution () {

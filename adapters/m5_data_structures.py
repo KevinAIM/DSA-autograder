@@ -211,27 +211,27 @@ q.enqueue(2);
 q.enqueue(3);
 
 if (q.tail != 3) {{
-    System.out.println("{{\\"status\\":\\"fail\\",\\"class\\":\\"Queue\\",\\"reason\\":\\"tail should be 3 after 3 enqueues, got \\" + q.tail}}");
+    System.out.println("{{\\"status\\":\\"fail\\",\\"class\\":\\"Queue\\",\\"reason\\":\\"tail wrong after 3 enqueues\\"}}");
     return;
 }}
 
 // test dequeue returns correct value
 int val = q.dequeue();
 if (val != 1) {{
-    System.out.println("{{\\"status\\":\\"fail\\",\\"class\\":\\"Queue\\",\\"reason\\":\\"dequeue() should return 1 (FIFO), got \\" + val}}");
+    System.out.println("{{\\"status\\":\\"fail\\",\\"class\\":\\"Queue\\",\\"reason\\":\\"dequeue() returned wrong value, expected 1\\"}}");
     return;
 }}
 
 // test head advanced
 if (q.head != 1) {{
-    System.out.println("{{\\"status\\":\\"fail\\",\\"class\\":\\"Queue\\",\\"reason\\":\\"head should be 1 after dequeue, got \\" + q.head}}");
+    System.out.println("{{\\"status\\":\\"fail\\",\\"class\\":\\"Queue\\",\\"reason\\":\\"head wrong after dequeue\\"}}");
     return;
 }}
 
 // test second dequeue
 int val2 = q.dequeue();
 if (val2 != 2) {{
-    System.out.println("{{\\"status\\":\\"fail\\",\\"class\\":\\"Queue\\",\\"reason\\":\\"dequeue() should return 2, got \\" + val2}}");
+    System.out.println("{{\\"status\\":\\"fail\\",\\"class\\":\\"Queue\\",\\"reason\\":\\"second dequeue() returned wrong value, expected 2\\"}}");
     return;
 }}
 

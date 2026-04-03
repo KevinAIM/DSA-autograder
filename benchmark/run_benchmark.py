@@ -14,7 +14,6 @@ def run_case(module: str, case_dir: Path) -> str:
     module_upper = module.upper()
     original_dir = Path(module_upper)
     backup_dir = Path(f"{module_upper}_backup")
-    print(f"DEBUG: looking for {original_dir.absolute()}")
 
     # cleanup any leftover backup from previous crashed run
     if backup_dir.exists():
@@ -47,8 +46,6 @@ def run_case(module: str, case_dir: Path) -> str:
         )
 
         temp_config.unlink()
-        print(f"DEBUG OUTPUT: {repr(result.stdout)}")
-        print(f"DEBUG STDERR: {repr(result.stderr)}")
         return result.stdout
 
     finally:

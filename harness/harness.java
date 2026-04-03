@@ -1,52 +1,69 @@
 package harness;
 
-import M5.Stack;
-import M5.Queue;
-import M5.LinkedList;
-import M5.ListNode;
-import M5.TreeNode;
-import M5.BinarySearchTree;
+import M7.Graph;
+import java.util.Arrays;
 
 public class Harness {
     public static void main(String[] args) {
         
-LinkedList l = new LinkedList();
-
-// test insert - inserts at front so order is reversed
-l.insert(1);
-l.insert(2);
-l.insert(3);
-
-// test toString to verify structure
-String listStr = l.toString();
-if (!listStr.equals("[3,2,1,]")) {
-    System.out.println("{\"status\":\"fail\",\"class\":\"LinkedList\",\"reason\":\"insert() failed, expected [3,2,1,] got \" + listStr}");
+// Test BFS
+int n1 = 8;
+int[][] A = {
+    {0, 1, 0, 0, 1, 0, 0, 0},
+    {1, 0, 0, 0, 0, 1, 0, 0},
+    {0, 0, 0, 1, 0, 1, 1, 0},
+    {0, 0, 1, 0, 0, 0, 1, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0},
+    {0, 1, 1, 0, 0, 0, 1, 0},
+    {0, 0, 1, 1, 0, 1, 0, 1},
+    {0, 0, 0, 1, 0, 0, 1, 0}
+};
+Graph g1 = new Graph(n1, A);
+int[] bfsResult = g1.bfs(1);
+int[] bfsExpected = {1, 0, 2, 3, 2, 1, 2, 3};
+if (!Arrays.equals(bfsResult, bfsExpected)) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"Graph\",\"reason\":\"bfs() wrong answer\"}");
     return;
 }
 
-// test search - should find existing node
-ListNode found = l.search(2);
-if (found == null || found.key != 2) {
-    System.out.println("{\"status\":\"fail\",\"class\":\"LinkedList\",\"reason\":\"search(2) failed, expected node with key 2\"}");
+// Test Bellman-Ford
+int n2 = 5;
+int[][] B = {
+    {0, 6, 0, 7, 0},
+    {0, 0, 5, 8, -4},
+    {0, -2, 0, 0, 0},
+    {0, 0, -3, 0, 9},
+    {2, 0, 7, 0, 0}
+};
+Graph g2 = new Graph(n2, B);
+boolean bfResult = g2.bellman_ford(0);
+if (!bfResult) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"Graph\",\"reason\":\"bellman_ford() should return true (no negative cycle)\"}");
+    return;
+}
+int[] bfExpected = {0, 2, 4, 7, -2};
+if (!Arrays.equals(g2.d, bfExpected)) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"Graph\",\"reason\":\"bellman_ford() wrong distances\"}");
     return;
 }
 
-// test search - should return null for missing key
-ListNode notFound = l.search(99);
-if (notFound != null) {
-    System.out.println("{\"status\":\"fail\",\"class\":\"LinkedList\",\"reason\":\"search(99) should return null\"}");
+// Test Dijkstra
+int[][] C = {
+    {0, 10, 0, 5, 0},
+    {0, 0, 1, 2, 0},
+    {0, 0, 0, 0, 4},
+    {0, 3, 9, 0, 2},
+    {7, 0, 6, 0, 0}
+};
+Graph g3 = new Graph(n2, C);
+g3.dijkstra(0);
+int[] dijkExpected = {0, 8, 9, 5, 7};
+if (!Arrays.equals(g3.d, dijkExpected)) {
+    System.out.println("{\"status\":\"fail\",\"class\":\"Graph\",\"reason\":\"dijkstra() wrong distances\"}");
     return;
 }
 
-// test delete - remove middle node
-l.delete(found);
-String afterDelete = l.toString();
-if (!afterDelete.equals("[3,1,]")) {
-    System.out.println("{\"status\":\"fail\",\"class\":\"LinkedList\",\"reason\":\"delete() failed, expected [3,1,] got \" + afterDelete}");
-    return;
-}
-
-System.out.println("{\"status\":\"pass\",\"class\":\"LinkedList\"}");
+System.out.println("{\"status\":\"pass\",\"class\":\"Graph\"}");
 
     }
 }

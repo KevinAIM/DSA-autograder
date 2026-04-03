@@ -25,28 +25,9 @@ public class Graph {
 	 * Output: the array dist, where dist[i] is the distance between the i-th node to s
 	 */
 	public int[] bfs(int s) {
-		int[] color = new int[n];
 		int[] dist = new int[n];
-		for (int i = 0; i < n; i++) {
-			color[i] = WHITE;
-			dist[i] = 0;  // should be Integer.MAX_VALUE
-		}
-		color[s] = GRAY;
 		dist[s] = 0;
-		java.util.Queue<Integer> queue = new java.util.LinkedList<>();
-		queue.add(s);
-		while (!queue.isEmpty()) {
-			int u = queue.poll();
-			for (int v = 0; v < n; v++) {
-				if (A[u][v] != 0 && color[v] == WHITE) {
-					color[v] = GRAY;
-					dist[v] = dist[u] + 1;
-					queue.add(v);
-				}
-			}
-			color[u] = BLACK;
-		}
-		return dist;
+		return dist;  
 	}
 	
 	public void initialize_single_source(int s) {

@@ -2,7 +2,7 @@
 
 An automated grading and feedback system for programming assignments. Designed to evaluate student code submissions, retrieve relevant course material from lecture slides, and generate adaptive, escalating feedback powered by an LLM. Originally built for a Java Data Structures and Algorithms course, with an architecture designed to generalize across CS courses.
 
----
+
 
 ## Overview
 
@@ -10,7 +10,7 @@ Students submit Java files through Canvas. The autograder compiles and runs each
 
 The system is modular by design: each assignment has a config file and an adapter that defines what to test and how. Everything else — slide ingestion, retrieval, feedback generation, attempt tracking — is course-agnostic.
 
----
+
 
 ## How It Works
 
@@ -20,13 +20,25 @@ The system is modular by design: each assignment has a config file and an adapte
 4. **Harness generation** — A Java test harness is dynamically generated for each method in the assignment. The harness runs the student's method against test cases and compares output to a known correct answer.
 5. **Execution** — The harness is compiled and run with a timeout. Runtime errors and exceptions are caught and reported.
 6. **Retrieval** — The student's error is used to query the vector store, retrieving the most relevant slide content to use as context for feedback.
-7. **Adaptive feedback** — The attempt count for this student and method determines the hint level. The LLM returns a short explanation and concrete next steps in JSON format, escalating from vague hints to full solutions across attempts.
+7. **Adaptive feedback** — The attempt count for this student and method determines the hint level. The LLM returns a short explanation, concrete next steps, and resource links in JSON format, escalating across attempts.
 
----
+
+
+## Hint Escalation
+
+Feedback escalates across attempts, with resource links tied to each hint level:
+
+| Attempt | Hint Level | Resource |
+|---------|------------|----------|
+| 1 | Vague hint pointing to the relevant concept | Link to full slide PDF |
+| 2 | Specific hint referencing the relevant pseudocode line and slide number | Link to exact slide page |
+| 3 | Detailed explanation of what is wrong and why (no solution given) | Panopto video link at relevant timestamp |
+| 4+ | Full solution with complete explanation | No link |
+
+
 
 ## Project Structure
 
-```
 DSA-autograder/
 ├── adapters/
 │   ├── base.py                        # Base adapter class (interface)
@@ -43,99 +55,113 @@ DSA-autograder/
 ├── scripts/
 │   ├── driver.py                      # Main entry point
 │   ├── feedback.py                    # LLM feedback generation
+│   ├── formatter.py                   # Student-facing terminal output formatting
+│   ├── output_formatter.py            # Windows-safe ASCII output formatter
 │   ├── ingest_slides.py               # Slide ingestion and vector retrieval
+│   ├── video_search.py                # Caption-based Panopto timestamp search
 │   ├── attempt_tracker.py             # Per-student attempt tracking
 │   └── run_compile.py                 # Java compile, run, and security scan
 ├── slides/                            # Course slide PDFs
+├── captions/                          # Panopto caption files per video (M4-M7)
 ├── vector_store/                      # Chroma vector databases (generated)
 ├── submissions/                       # Student attempt history (generated)
+├── benchmark/
+│   ├── cases/                         # Test case Java files per module
+│   ├── expected/                      # Expected output JSON per case
+│   └── run_benchmark.py               # Benchmark runner (20 test cases, M4-M7)
 ├── harness/
 │   └── Harness.java                   # Auto-generated test harness (do not edit)
 ├── M4/                                # Student submission files (example)
 ├── M5/                                # Student submission files (example)
 ├── M6/                                # Student submission files (example)
 └── M7/                                # Student submission files (example)
-```
-
----
 
 ## Setup
 
 ### Dependencies
 
-```bash
 pip install -r requirements.txt
-```
+
 
 Also requires **Poppler** for PDF processing (Windows: download from [poppler-windows](https://github.com/oschwartz10612/poppler-windows/releases) and add `bin/` to PATH).
 
 ### Environment Variables
 
-```bash
 set OPENAI_API_KEY=your_key_here   # Windows
 export OPENAI_API_KEY=your_key_here # Mac/Linux
-```
+
 
 To change the OpenAI model:
-```bash
 set OPENAI_MODEL=gpt-4.1-mini
-```
+
 
 ### Slide Ingestion (one-time per assignment)
 
-```bash
 python -m scripts.ingest_slides configs/m4_sorts.json
 python -m scripts.ingest_slides configs/m5_data_structures.json
 python -m scripts.ingest_slides configs/m6_dp.json
 python -m scripts.ingest_slides configs/m7_graphs.json
-```
 
 This processes each slide PDF, extracts text via GPT-4o vision, and stores embeddings in the vector store. Only needs to run once per assignment setup.
 
----
-
 ## Running
 
-```bash
 python -m scripts.driver configs/m4_sorts.json
 python -m scripts.driver configs/m5_data_structures.json
 python -m scripts.driver configs/m6_dp.json
 python -m scripts.driver configs/m7_graphs.json
-```
 
 Defaults to `configs/m4_sorts.json` if no config is specified.
 
----
+## Benchmark
+
+A regression test suite of 20 cases across M4-M7 covering correct submissions, common errors, compile errors, runtime errors, and banned API usage.
+
+python benchmark/run_benchmark.py
+
+
+Expected output: `Results: 20/20 passed`
 
 ## Output
 
-Each method or class in the assignment produces a JSON result:
+Each method or class produces a result printed to the terminal:
 
-```json
+[FAIL] insertionSort
+ Your index calculation at the insertion step is incorrect, causing an ArrayIndexOutOfBoundsException.
+   1. Review the line where the key is placed after the while loop.
+   2. Compare your index to the pseudocode on Slide 4.
+   3. Ensure the index stays within array bounds.
+
+   Slides: https://kevinaim.github.io/DSA-autograder/slides/CSITBG2%20Module%204.pdf#page=4
+
+
+Possible statuses: `[PASS]`, `[FAIL]`, `[RUNTIME ERROR]`, `[COMPILE ERROR]`, `[BLOCKED]`.
+
+## Config File Format
+
+Each module config includes:
+
 {
-  "status": "fail",
-  "method": "merge_sort",
-  "testIndex": 2,
-  "input": "[2, 1]",
-  "expected": "[1, 2]",
-  "actual": "[2, 1]",
-  "feedback": {
-    "short_explanation": "...",
-    "next_steps": ["...", "..."],
-    "references": [{ "id": "...", "reason": "..." }]
-  }
+  "name": "M4 Sorting Algorithms",
+  "module": "M4",
+  "adapter": "M4SortsAdapter",
+  "student_files": ["M4/Sort.java"],
+  "db_path": "vector_store/dsa_m4",
+  "slides_pdf": "slides/CSITBG2 Module 4.pdf",
+  "slides_url": "https://kevinaim.github.io/DSA-autograder/slides/CSITBG2%20Module%204.pdf",
+  "package": "M4",
+  "student_class": "Sort",
+  "timeout_sec": 5.0,
+  "videos": [
+    {
+      "title": "M4a: Insertion Sort",
+      "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=...",
+      "captions": "captions/m4a_insertion_sort.txt",
+      "methods": ["insertionSort"]
+    }
+  ]
 }
-```
 
-Possible statuses: `pass`, `fail`, `runtime_error`, `compile_error`, `blocked`, `unknown_harness_output`.
-
-Feedback escalates across attempts:
-- **Attempt 1** — vague hint pointing to the relevant concept
-- **Attempt 2** — more specific, referencing pseudocode
-- **Attempt 3** — detailed explanation of what is wrong
-- **Attempt 4+** — full solution with explanation
-
----
 
 ## Adding a New Assignment
 
@@ -144,9 +170,9 @@ Feedback escalates across attempts:
 3. Implement `methods()` and `write_harness()`
 4. Add the adapter to `adapters/registry.py`
 5. Run slide ingestion for the new assignment's PDF
-6. Run with `python -m scripts.driver configs/your_config.json`
+6. Add caption files for each video under `captions/`
+7. Run with `python -m scripts.driver configs/your_config.json`
 
----
 
 ## Modules Covered
 
@@ -157,7 +183,7 @@ Feedback escalates across attempts:
 | M6 | Dynamic Programming | `RodCut` (memoized_cut_rod, bottom_up_cut_rod, extended_bottom_up_cut_rod), `LCS` (lcs_length) |
 | M7 | Graph Algorithms | `Graph` (bfs, bellman_ford, dijkstra) |
 
----
+
 
 ## Planned Features
 

@@ -1,0 +1,477 @@
+>> Hi, everyone.
+Next, we're going
+0:01
+to talk about merge sort.
+0:04
+So merge sort adopts
+0:06
+a design philosophy named
+divide and conquer,
+0:09
+and actually divide and
+0:12
+conquer is very popular
+in our real life as well.
+0:15
+Suppose that you're given
+a big project to work
+0:18
+on and which can take many
+days for you to complete.
+0:22
+To make your job easier,
+0:27
+you may want to divide
+the big problem into
+0:30
+multiple sub-problems
+and work on this.
+0:32
+So that's the first
+step called divide.
+0:36
+And after that, you work
+on each sub-problem and
+0:40
+get the solutions to the
+0:46
+sub-problems and step
+is called conquer.
+0:47
+In the last step, you
+combine the solutions to the
+0:52
+sub-problems into a solution to
+0:59
+the big problem so that
+you get the task done.
+1:01
+And in computer science,
+1:07
+we adapt this logic as
+1:09
+well just to solve big
+and complicated problems.
+1:11
+So in merge sort,
+1:17
+yes, we use this log.
+1:19
+We use this design paradigm.
+1:21
+So here suppose we're given
+a very long array to sort,
+1:24
+so we may think, this task is
+1:31
+just too complicated for us.
+1:34
+So what we can do is
+that we're going to
+1:38
+divide it into sub-arrays.
+1:40
+So in each divide step we
+1:43
+divide an array into two
+sub-arrays of similar size.
+1:47
+So if the big array
+size is an odd number,
+1:53
+we divide it into,
+1:59
+say for example, five,
+2:00
+then we divide it
+into three and two.
+2:02
+If the input array size
+is an even number six,
+2:04
+say, then we are
+going to get two
+2:08
+sub-arrays, each of size three.
+2:10
+So we're going to keep dividing
+2:13
+the sub-array until
+each sub-array
+2:16
+only has one number
+2:19
+in it because we cannot
+divide a single number,
+2:21
+and that is the divide step.
+2:26
+And after we finish
+the divide step,
+2:29
+we're going to conquer them.
+2:32
+Actually here, think about it.
+2:34
+If you are given an array
+with only one value,
+2:37
+do we really need to sort it?
+2:41
+No, we don't need to sort it.
+2:44
+Given an array of one
+value, by its nature,
+2:47
+that array is already
+2:50
+sorted because there
+is no comparison.
+2:51
+So in merge sort, essentially,
+2:54
+there's no conquer step
+3:00
+because at the end
+of the division,
+3:02
+all the sub-arrays or all the
+3:05
+sub-problems have
+already been solved.
+3:07
+So next is the merge step.
+3:10
+In the merge step,
+3:13
+we're going to
+merge two neighbor
+3:15
+sorted sub-arrays into one
+bigger sorted sub-array.
+3:18
+So here, for example,
+3:23
+we're given two small
+sorted sub-array,
+3:26
+each only has one value,
+3:31
+50 and 21,
+3:33
+then we're going to
+combine or merge them into
+3:34
+a sorted array with two values.
+3:37
+So we got 21 and 50.
+3:41
+And later we're
+going to merge this
+3:44
+sub-array with another one
+that only has one value,
+3:46
+83, so then we get
+21, 50, and 83.
+3:50
+So in the last step,
+3:55
+we are going to merge,
+3:57
+there's two sorted sub-arrays,
+3:59
+so that we can
+4:03
+get an array whose length
+is five and it's sorted.
+4:05
+And that's the final solution
+we're going to deliver.
+4:10
+Here, as you can see,
+4:14
+yes, the divide
+step is quite easy.
+4:16
+We just need to cut
+4:18
+an array into two
+halves. That's easy.
+4:22
+But the merge step
+can be complicated.
+4:27
+Let's see how we solve
+this merge step.
+4:29
+So this is the function that
+help us to merge two sorted
+4:37
+sub-arrays into a big
+sorted sub-array.
+4:42
+So here in a merge function,
+4:47
+we have four input arguments,
+4:49
+A, p, q, r. A is the array,
+4:52
+and the p is the starting
+index of the sub-array,
+4:56
+so is the starting index of
+5:01
+the left sub-array
+that we need to merge.
+5:04
+So here in this example,
+5:06
+we're given two
+sorted sub-arrays.
+5:08
+I'm going to mark them here.
+5:10
+So p is the starting index
+of the left sub-array.
+5:12
+So p is nine in this case.
+5:15
+And q is the ending index
+of the left sub-array,
+5:18
+and r is the end index
+of the right sub-array.
+5:23
+And then you may wonder,
+5:31
+what is the starting index
+of the right sub-array?
+5:33
+Since these two sub-arrays
+have to be neighbors,
+5:37
+so it's very easy to tell
+5:41
+that the right sub-array
+should start at index q+1.
+5:44
+So this is how the
+merge function works.
+5:49
+In the beginning,
+we first create
+5:53
+a copy of the left and
+the right subarray.
+5:55
+So we call them L and
+R. And besides that,
+5:58
+we append an infinity at the end
+6:03
+of both L and R. And next,
+6:08
+we're going to merge them.
+6:14
+So when we merge them,
+6:16
+we want to put
+6:18
+the smallest value among the
+left sub-array and the right
+6:20
+sub-array into the first
+location of the array.
+6:24
+But how can we do that?
+So do we have to check
+6:32
+all the values in left and right
+6:37
+in order to find the
+smallest one? No, we don't.
+6:40
+Since these two sub-arrays
+are already sorted,
+6:43
+we only need to check the
+first one from the left
+6:46
+and first one from the right
+to see which one is smaller.
+6:49
+So over here, we can see that
+6:52
+the first value from
+right is smaller.
+6:54
+Then we know that that [NOISE]
+6:59
+value one must be the
+smallest among other values.
+7:02
+So this value one goes
+to the first place
+7:06
+of the array to be merged.
+7:10
+And then since this
+value one is gone,
+7:15
+we're going to remove
+it from right.
+7:19
+In the next one,
+7:22
+we're going to compare
+7:23
+the second value from
+7:26
+the right sub-array because the
+7:31
+first one is already gone.
+7:32
+So yes, we're going to see
+whoever is smaller and
+7:33
+can go to the second place
+of the merged sub-array.
+7:37
+So over here, both of
+them are the same,
+7:41
+so we can pick anyone.
+7:44
+Let's say we just pick
+the one from left.
+7:45
+So then it goes to the second
+place of the merged array.
+7:50
+So then this value
+is gone as well,
+7:56
+and then in the next,
+8:00
+we're going to compare
+the second value
+8:02
+from left and the second
+value from right.
+8:04
+Whoever is smaller can go to
+8:06
+the third place of
+the merged array.
+8:08
+And here, as you can see,
+8:12
+it is these two that can
+get the opportunity.
+8:14
+So here, this two goes
+here and this two is gone,
+8:19
+and we repeat this
+procedure on q,
+8:23
+we copy and paste all the
+values from left and right to
+8:25
+the original place in the array
+A but in ascending order.
+8:29
+Yes, that's how
+merge sort works.
+8:37
+Then this is the whole
+picture of merge sort.
+8:40
+So [NOISE] in this function,
+8:46
+we're given three parameters,
+8:49
+A is the array and p is
+8:52
+the starting index of the
+8:55
+sub-array that we
+want to work on.
+8:56
+So for example, given a
+very long array capital A,
+8:58
+we want to work on
+this part of it,
+9:02
+so p is the starting
+index of the sub-array
+9:05
+and r is the end index
+of this subarray.
+9:07
+First we're going
+to check if p is
+9:13
+less than r. If p
+is less than r,
+9:16
+it means that the sub-array
+has at least two values.
+9:19
+So then if the sub-array has
+9:23
+at least two values,
+we need to cut it.
+9:25
+So we need to divide it.
+9:28
+So here we first calculate
+the middle point q.
+9:30
+Q is the average value
+between p and r,
+9:33
+so it is the middle point.
+9:38
+Then we are going to
+get the left sub-array,
+9:39
+which starts at p and ends at q,
+9:44
+and the right sub-array,
+9:46
+which starts at q+1 and ends at
+9:47
+r. So then we're going
+to call merge sort on
+9:50
+each sub-array to get the
+9:53
+left and the right
+sorted and later we're
+9:56
+going to call the merge
+function to merge these
+9:59
+two sorted sub-arrays together.
+10:02
+So this is how merge sort works.
+10:05
+And the complexity of
+merge sort is open logn.
+10:08
+So again, here,
+10:12
+this O is the worst
+case complexity
+10:15
+and is the number of
+values in the array.
+10:21
+I hope that you have
+a good understanding
+10:28
+of merge sort. Thank you.
+10:31

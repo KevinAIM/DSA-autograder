@@ -1,6 +1,9 @@
 import json
+import os
 import subprocess
 import shutil
+import tempfile
+import time
 from pathlib import Path
 
 CONFIG_MAP = {
@@ -10,49 +13,77 @@ CONFIG_MAP = {
     "m7": "configs/m7_graphs.json"
 }
 
-def run_case(module: str, case_dir: Path) -> str:
+
+def retry_unlink(path: Path, attempts: int = 5, delay_sec: float = 0.2):
+    for i in range(attempts):
+        try:
+            if path.exists():
+                path.unlink()
+            return
+        except PermissionError:
+            if i == attempts - 1:
+                raise
+            time.sleep(delay_sec)
+
+
+def retry_rmtree(path: Path, attempts: int = 5, delay_sec: float = 0.2):
+    for i in range(attempts):
+        try:
+            if path.exists():
+                shutil.rmtree(path)
+            return
+        except PermissionError:
+            if i == attempts - 1:
+                raise
+            time.sleep(delay_sec)
+
+
+def run_case(module: str, case_dir: Path):
     module_upper = module.upper()
     original_dir = Path(module_upper)
-    backup_dir = Path(f"{module_upper}_backup")
+    backup_root = Path(tempfile.mkdtemp(prefix=f"{module_upper}_backup_", dir="benchmark"))
+    case_files = list(case_dir.glob("*.java"))
 
-    # cleanup any leftover backup from previous crashed run
-    if backup_dir.exists():
-        shutil.rmtree(backup_dir)
-
-    # backup original files
-    shutil.copytree(original_dir, backup_dir)
+    for f in case_files:
+        target = original_dir / f.name
+        if target.exists():
+            shutil.copy2(target, backup_root / f.name)
 
     try:
-        # copy benchmark files in
-        for f in case_dir.glob("*.java"):
-            shutil.copy(f, original_dir / f.name)
+        for f in case_files:
+            shutil.copy2(f, original_dir / f.name)
 
-        # load base config
         base_config_path = Path(CONFIG_MAP[module])
         with open(base_config_path) as f:
             config = json.load(f)
 
-        # write temp config
-        temp_config = Path("benchmark/temp_config.json")
+        temp_config = backup_root / "temp_config.json"
         with open(temp_config, "w") as f:
             json.dump(config, f)
+        attempt_path = backup_root / "student_001.json"
+        env = os.environ.copy()
+        env["ATTEMPT_TRACKER_PATH"] = str(attempt_path)
 
-        # run driver
         result = subprocess.run(
-            ["python", "-m", "scripts.driver", str(temp_config)],
+            ["python", "-u", "-m", "scripts.driver", str(temp_config)],
             capture_output=True,
             text=True,
-            timeout=120
+            timeout=300,
+            env=env
         )
 
-        temp_config.unlink()
-        return result.stdout
+        return result.stdout, result.stderr
 
     finally:
-        # always restore originals even if something crashes
-        shutil.rmtree(original_dir)
-        shutil.copytree(backup_dir, original_dir)
-        shutil.rmtree(backup_dir)
+        for f in case_files:
+            backup_file = backup_root / f.name
+            target = original_dir / f.name
+            if backup_file.exists():
+                shutil.copy2(backup_file, target)
+        try:
+            retry_rmtree(backup_root)
+        except PermissionError:
+            pass
 
 def parse_output(output: str) -> dict:
     results = {}
@@ -77,28 +108,31 @@ def parse_output(output: str) -> dict:
 def main():
     cases_dir = Path("benchmark/cases")
     expected_dir = Path("benchmark/expected")
-    
+
     total = 0
     passed = 0
     failed = 0
-    
+
     for module_dir in sorted(cases_dir.iterdir()):
         for case_dir in sorted(module_dir.iterdir()):
             module = module_dir.name
             case = case_dir.name
             expected_file = expected_dir / f"{module}_{case}.json"
-            
+
             if not expected_file.exists():
                 print(f"⚠️  No expected file for {module}/{case}, skipping")
                 continue
-            
+
             with open(expected_file) as f:
                 expected = json.load(f)
-            
+
             print(f"\nRunning {module}/{case}...")
-            output = run_case(module, case_dir)
+            output, errors = run_case(module, case_dir)
             actual = parse_output(output)
-            
+            if not actual:
+                print(f"   RAW STDOUT: {repr(output[:300])}")
+                print(f"   RAW STDERR: {repr(errors[:1000])}")
+
             total += 1
             if actual == expected:
                 passed += 1
@@ -108,10 +142,51 @@ def main():
                 print(f"❌ FAIL")
                 print(f"   Expected: {expected}")
                 print(f"   Got:      {actual}")
-    
+
     print(f"\n{'='*40}")
     print(f"Results: {passed}/{total} passed")
     print(f"{'='*40}")
 
+
+def safe_main():
+    cases_dir = Path("benchmark/cases")
+    expected_dir = Path("benchmark/expected")
+
+    total = 0
+    passed = 0
+
+    for module_dir in sorted(cases_dir.iterdir()):
+        for case_dir in sorted(module_dir.iterdir()):
+            module = module_dir.name
+            case = case_dir.name
+            expected_file = expected_dir / f"{module}_{case}.json"
+
+            if not expected_file.exists():
+                print(f"WARNING: No expected file for {module}/{case}, skipping")
+                continue
+
+            with open(expected_file) as f:
+                expected = json.load(f)
+
+            print(f"\nRunning {module}/{case}...")
+            output, errors = run_case(module, case_dir)
+            actual = parse_output(output)
+            if not actual:
+                print(f"   RAW STDOUT: {repr(output[:300])}")
+                print(f"   RAW STDERR: {repr(errors[:1000])}")
+
+            total += 1
+            if actual == expected:
+                passed += 1
+                print("PASS")
+            else:
+                print("FAIL")
+                print(f"   Expected: {expected}")
+                print(f"   Got:      {actual}")
+
+    print(f"\n{'=' * 40}")
+    print(f"Results: {passed}/{total} passed")
+    print(f"{'=' * 40}")
+
 if __name__ == "__main__":
-    main()
+    safe_main()

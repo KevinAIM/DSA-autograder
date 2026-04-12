@@ -1,0 +1,652 @@
+>> Welcome back to the topic
+of dynamic programming.
+0:00
+Next, we're going to
+discuss a problem named
+0:03
+rod-cut and it can be solved
+0:07
+by using dynamic programming
+very efficiently.
+0:09
+So let's look at the problem.
+0:12
+In the rod-cut problem,
+0:15
+the input is an array
+of n values and
+0:17
+also we're giving a number
+n. So what does that mean?
+0:23
+Here, say, if we
+have n equals 10
+0:30
+and also we're giving
+0:34
+this price array whose
+length is also 10.
+0:35
+So this price already
+tells us that for
+0:38
+rod of length one,
+we can make $1.
+0:41
+For rot of length two,
+0:44
+we can make $5.
+0:46
+For rod of length
+three, we can make
+0:48
+$8 and for rod of length 10,
+0:49
+we can make $30.
+0:52
+So the question is giving a rot
+0:54
+of length n and we're
+allowed to cut it as
+0:57
+many times as we want
+as long as each piece
+1:01
+has at least a minimum
+length of one.
+1:04
+And so it asks us to
+find the best way to
+1:08
+cut a rod of length n to
+maximize our revenue.
+1:12
+So yes, this is the problem.
+1:16
+And here, you can see
+that rod of length four,
+1:19
+we have eight possible
+ways to cut it.
+1:23
+So for example, here,
+1:26
+given a rod of length four,
+1:28
+we can just say, let's don't
+cut it and sell it directly.
+1:30
+And according to
+this price array,
+1:33
+we know that we can make
+$9 and we can cut it
+1:36
+into one inch and three inches.
+1:39
+And for the one inch,
+1:42
+we make $1,
+1:44
+for the three inch, we make $9,
+1:45
+sorry $8, so in total,
+1:47
+we make $9 and we can
+cut into two and two.
+1:49
+In total we make $10.
+1:53
+So after we enumerate
+all the possible cuts,
+1:55
+we can find, okay,
+yes, this way,
+1:59
+two plus two, two
+inch plus two inch is
+2:02
+the best cut that produces
+$10 of revenue for us.
+2:05
+so we find the answer.
+2:09
+So to solve this problem,
+2:11
+we can use this solution
+called brute force solution.
+2:14
+That's called the
+brute force solution,
+2:18
+which is to enumerate
+all the possible cut
+2:19
+and see which one produces
+the highest revenue.
+2:22
+But that one has a
+very high complexity.
+2:26
+So its complexity
+is two to the power
+2:31
+of n. So where n is
+the length of the rod.
+2:34
+So if you have some
+sense about the number,
+2:38
+you should know when
+n is about 100,
+2:44
+two the power of 100 is
+a huge, huge number.
+2:49
+It's going to be a
+trillion or zillions,
+2:53
+in the degree of zillions.
+2:57
+And it's not affordable but
+even by modern computers,
+3:00
+you have to wait for years in
+3:05
+order to get the
+answer calculated.
+3:07
+So then people design
+or the mathematicians
+3:11
+design a better way to calculate
+3:16
+the best revenue for a rod
+3:19
+of length n. So what
+they do is that,
+3:21
+say instead of talking about
+all the possible cuts,
+3:24
+let's make the problem easier by
+3:29
+only considering
+the left most cut.
+3:31
+So giving a rod of length n,
+3:34
+let's say we make the
+left most cut at i,
+3:36
+it means that we cannot further
+3:39
+cut the left part anymore
+3:43
+because this is already
+the left most cut.
+3:44
+But later we're
+allowed to further cut
+3:47
+the right part as much as
+3:50
+possible as many
+times as we want.
+3:52
+So if we use the notation
+3:55
+rn to denote the
+highest revenue,
+3:57
+the max revenue for
+rod of length n,
+4:01
+and we use pn to denote the
+revenue for rod of length
+4:05
+n. Pn means that we just don't
+4:11
+cut the rod of length n and
+4:14
+south directly how much
+money we can make.
+4:16
+Then we can say, if
+we make the left
+4:18
+most cut at i and then for
+4:21
+the left rod which we are
+not allowed to further cut,
+4:25
+we can make pi because
+length is determined.
+4:31
+For the right part because
+its length is n minus
+4:35
+i and we're allowed
+to further cut it.
+4:38
+So the revenue we can make
+from it is rn minus i.
+4:41
+So in total, if we make
+the left most cut at i,
+4:46
+then the total revenue we can
+make is pi plus rn minus i.
+4:51
+So here, instead of
+enumerating all possible cuts,
+4:55
+the mathematician suggest us to
+5:00
+only think about
+the left most cut.
+5:02
+Let's just enumerate all
+the possible left cards.
+5:05
+So all the possible left cuts.
+5:08
+The left cards can start from
+zero and go up to sorry,
+5:10
+the left most card
+can start from one.
+5:19
+And go all the way to n.
+So when it goes to n,
+5:22
+it means that we just
+don't cut it and we
+5:26
+sell the whole rod of
+length n directly.
+5:29
+So here we're just going to
+5:32
+try all the possible
+left and most cuts,
+5:34
+where i start from
+one and ends at
+5:40
+n. We're going to see whichever
+5:44
+left most cut gives us
+5:48
+the highest revenue,
+we're going to take it.
+5:49
+And the result is simply ri.
+5:52
+So the result is the
+highest revenue we
+5:58
+can make for a rod of
+length n, that is rn.
+6:02
+So this is the explanation of
+the mathematical solution.
+6:05
+And so if we spread it
+out, it will be like this.
+6:11
+So then, yes, next,
+6:18
+we can just following
+this design,
+6:21
+or the math equation,
+6:26
+we can just propose an
+algorithm to calculate it.
+6:28
+It's an iterative
+algorithm cutter rod.
+6:31
+It takes two parameters.
+6:34
+P is the press array and n
+is the length of the rod.
+6:38
+So what it does is that
+the returns, calculate.
+6:43
+It simply returns rn,
+6:47
+calculates rn or returns rn.
+6:50
+So here, if n is zero,
+6:52
+it means that if we have a rod
+whose length is zero inch,
+6:54
+we don't need to do
+any calculation,
+6:57
+we just need to return
+zero because we
+6:59
+cannot make any
+dollar from nothing.
+7:01
+It's just $0. Otherwise,
+what it does is that it say,
+7:04
+I don't know how much,
+7:08
+if n is bigger than zero,
+7:09
+it starts by saying,
+7:13
+I don't know how much
+money I can make from it.
+7:14
+So I'm just going to assume
+7:16
+that I can make
+negative infinity.
+7:17
+Or over here, you can change
+7:20
+this negative infinity to
+zero. That's your baseline.
+7:22
+Even if you sell nothing,
+7:25
+you are not going to lose
+money, it doesn't matter.
+7:27
+This is just a
+placeholder and for
+7:30
+i starting from one to n,
+7:33
+it is going to calculate this
+pi plus cut-rod pn minus i.
+7:36
+If you remember, we say
+cut-rod, pn calculates rn.
+7:41
+Then here this part,
+7:46
+cut-rod, p and minus i
+calculates rn minus i.
+7:48
+So here, the rod part is
+basically pi plus rn minus i.
+7:53
+So over here, it just enumerates
+7:59
+all the possible
+left cuts rom one to
+8:01
+n and calculate its revenue and
+8:05
+see if it's bigger than our
+current best revenue q.
+8:08
+If so, we're going to update
+our current best known cut.
+8:12
+Otherwise, it's
+going to continue.
+8:18
+At the end, q is
+guaranteed to be rn,
+8:21
+the highest revenue
+for of length n. So
+8:27
+this is the design of
+the set code, simple.
+8:30
+It's just a straightforward
+translation
+8:34
+of the math formula
+into pseudocode.
+8:37
+However, when we write,
+8:40
+you will notice that it's
+also extremely slow because
+8:43
+it's time complexity is
+also two to the power n,
+8:46
+the same as the brute
+force approach.
+8:50
+And this is because
+it's still asks us to
+8:53
+calculate the same rn
+minus i multiple times.
+8:59
+So over here, you can notice,
+9:05
+stop when we are asked
+to calculate r4,
+9:07
+we first need to calculate
+r3 and then r2 and then r1.
+9:10
+And in the branch of r3,
+9:14
+we need to further calculate r2,
+9:17
+r1 and r0, etc.
+9:20
+So over here, you can see
+that we're calculating
+9:23
+the solution to the same
+problem multiple times.
+9:26
+So for example, for r1,
+9:30
+we're calculating
+how many times?
+9:32
+Four times. R2 we're
+calculating two times.
+9:34
+So yes, that's definitely
+9:39
+a waste of time
+because we're just
+9:41
+calculating the solution
+to the same problem
+9:43
+multiple times and to save time,
+9:46
+here it comes to
+dynamic programming.
+9:50
+so in dynamic programming,
+9:53
+we need to memorize the
+answer to the sub problems.
+9:55
+So that's why we propose
+9:59
+an algorithm named
+Memoist cutter-rod.
+10:01
+So the inputs are
+the same p and n,
+10:04
+p is the price array,
+10:07
+n is the length of the route.
+10:08
+And r is the new
+array that stores.
+10:10
+So here we want ri to store
+10:14
+the max revenue for
+rod of length i.
+10:18
+So in the beginning,
+10:24
+we don't know the
+highest revenue
+10:27
+for a rod of any length.
+10:29
+So we just say set ri to
+10:31
+negative infinity for all
+the i values in this array.
+10:34
+Then we're just going to
+call the auxiliary function,
+10:37
+with p and r,
+10:43
+in the auxiliary function,
+10:46
+we have three parameters p, n,
+10:47
+r. P is the price array and
+10:49
+n is the length of the
+rod that we want to
+10:52
+calculate and r is the revenue
+rate that we just created.
+10:55
+So here, in this
+auxiliary function,
+11:02
+we need to calculate rn.
+11:07
+So what it does is that it first
+11:09
+check if rn is bigger
+than or equal to zero.
+11:12
+If it's bigger than
+or equal to zero,
+11:15
+it just returns the answer.
+11:17
+It doesn't need to
+do any calculation
+11:19
+because if rn is zero,
+11:21
+it means that we have already
+11:23
+calculated the answer for n,
+11:25
+and we don't need to
+calculate it again.
+11:28
+We just return the answer.
+11:29
+Otherwise, it checks
+if n is zero or not,
+11:31
+if n is zero, yes, we
+don't do any calculation.
+11:35
+The highest revenue is zero.
+11:37
+Otherwise, the aux case means rn
+11:39
+is bigger than zero and
+we don't know rn yet,
+11:43
+so we need to do
+the calculation.
+11:47
+What it does is that,
+11:51
+for i starting from 1-i,
+11:53
+it calculates pi
+plus rn minus i.
+11:55
+This is pi plus rn minus i.
+11:59
+Here, when we
+calculate rn minus i,
+12:02
+we also call the
+auxiliary function,
+12:05
+which has the memory of
+12:09
+the solutions to the
+intermediate problems
+12:12
+or the sub problems.
+12:15
+And most of the time
+we're just going
+12:17
+to in this auxiliary cause,
+12:19
+we're just going to
+retrieve rn minus
+12:21
+i directly without
+doing any calculation.
+12:24
+So it saves us the time.
+12:27
+At the end we know q is rn
+but before returning q,
+12:28
+we're going to store the answer
+12:34
+in the array so that
+later we can reuse it.
+12:37
+So this is the power of
+dynamic programming.
+12:41
+This is the trick of dynamic
+programming because it keeps
+12:45
+record of the solutions
+to the sub problems,
+12:49
+and it reduces the
+time complexity from
+12:55
+two the power of n
+to O and square,
+12:58
+which makes the solution
+much much more efficient.
+13:02
+And so we also have
+other versions
+13:07
+of the dynamic
+programming solution
+13:11
+such as the bottom up one.
+13:14
+So in the bottom up one,
+13:15
+we iteratively calculate rn
+from r0 to r1 to r2 on q,
+13:17
+all the way to rn.
+13:24
+So this is what the
+bottom up solution does.
+13:27
+And yes, so this is the
+rod-cut problem. Thank you.
+13:30

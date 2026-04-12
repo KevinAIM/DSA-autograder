@@ -7,5 +7,26 @@
   "slides_pdf": "slides/CSITBG2 Module 4.pdf",
   "package": "M4",
   "student_class": "Sort",
-  "timeout_sec": 5.0
+  "timeout_sec": 5.0,
+  "slides_url": "https://kevinaim.github.io/DSA-autograder/slides/CSITBG2%20Module%204.pdf",
+  "videos": [
+  {
+    "title": "M4a: Insertion Sort",
+    "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=3af5b170-61d0-4942-b9d5-b30501483bbe",
+    "captions": "captions/m4a_insertion_sort.txt",
+    "methods": ["insertionSort"]
+  },
+  {
+    "title": "M4b: Merge Sort",
+    "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=a123844c-dc9c-493b-b2e5-b30100f44f86",
+    "captions": "captions/m4b_merge_sort.txt",
+    "methods": ["merge_sort", "merge"]
+  },
+  {
+    "title": "M4c: Quick Sort & Counting Sort",
+    "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=4f935483-d65a-4443-9fbf-b30100f44f7d",
+    "captions": "captions/m4c_quick_sort.txt",
+    "methods": ["quick_sort", "partition"]
+  }
+]
 }

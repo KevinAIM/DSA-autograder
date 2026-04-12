@@ -1,0 +1,357 @@
+>> Hi, everyone.
+In this episode,
+0:00
+we're going to talk
+about linked list.
+0:03
+Previously, we talked about
+stack, queue and array.
+0:06
+So in array we store
+or stack in queue.
+0:11
+We store all the values
+in consecutive places.
+0:15
+So they're all together
+next to each other.
+0:20
+And the beauty of
+it is that we can
+0:23
+easily access the values
+by using the index,
+0:26
+so given words you
+can just say A(4),
+0:29
+A(5) and we will be able
+to retrieve the value,
+0:33
+access the value at the
+corresponding location.
+0:37
+But a limitation of
+0:40
+this consecutive or continuous
+data structure is that,
+0:43
+in case that we need to
+create a huge array,
+0:48
+we may not have enough
+consecutive space in our memory,
+0:52
+and so that we cannot
+perform this operation.
+0:57
+And an alternative solution
+1:01
+to store data is to store
+them in discrete places.
+1:06
+So for example, we can have
+some values over here,
+1:09
+some values over there,
+some values over here,
+1:13
+some values over there.
+1:15
+And so as you can see,
+1:17
+in this storage style,
+1:21
+we store values in
+discrete places.
+1:24
+And if we let the first value,
+1:26
+remember the location
+of the second value,
+1:30
+the second value remember
+1:32
+the location of the third value,
+1:33
+third value remember the
+location of the fourth value,
+1:36
+we will be able to navigate
+through different values,
+1:38
+and in the discrete places.
+1:42
+So this is called linked list.
+1:45
+So a linked list is simply
+1:49
+a list of nodes that are
+connected by the links.
+1:52
+Here in each node,
+1:57
+we store the actual values.
+1:58
+So this is the linked
+list structure,
+2:01
+and there are different types
+of linked list structures.
+2:04
+The most fundamental one is
+called single linked list.
+2:09
+In single linked list,
+2:12
+every node only needs to
+2:14
+remember the location
+of the next node.
+2:15
+Well, there could be
+double linked list.
+2:19
+In double linked list,
+2:22
+every node needs to remember
+2:23
+the location of the previous
+node and next node.
+2:25
+So every node needs to
+remember two addresses.
+2:28
+And also there could be
+circular linked list.
+2:32
+It is that at
+2:35
+the end of the last node
+remembers the address of
+2:37
+the first node so that it's
+2:42
+like we're building a circle
+around the list of nodes.
+2:45
+And so in our class,
+we're going to
+2:49
+focus on double linked
+list without circles.
+2:52
+So in linked list,
+2:55
+the most fundamental data
+structure is called list node.
+2:58
+So here, every node
+is a list node.
+3:02
+Every list node can
+have three components.
+3:06
+The first one is the key.
+3:09
+Key is the actual value
+we store in this node,
+3:11
+and also it shows store
+3:15
+the link to the previous
+node and next node.
+3:17
+So that's the three
+pieces of information.
+3:20
+And so for the
+whole linked list,
+3:23
+so we only need to keep track
+of the first node because
+3:27
+by knowing the first node
+3:33
+we cut head and by
+following the links,
+3:36
+we'll be able to navigate
+3:39
+through all the
+nodes in the list.
+3:40
+So in linked list,
+3:44
+going to support
+three operations.
+3:46
+Search is the first one.
+3:49
+So here in the search operation,
+3:51
+giving the L,
+3:54
+which is the linked list and
+3:56
+k is the value that
+we want to look for.
+3:58
+So we are going to find
+4:01
+the first node in
+the linked list that
+4:03
+holds the key k. And
+this is the operation.
+4:06
+We start from the
+head and while head
+4:11
+is not new, by using this word,
+4:13
+we're limiting ourselves to
+4:16
+search within the linked list.
+4:20
+So in case x is NIL,
+4:23
+it means that we already search
+4:28
+beyond the scope of the linked
+list and we should stop.
+4:30
+And the key at x is not k,
+4:36
+we should perform search
+over the next node.
+4:41
+So this is the operation.
+4:44
+And the time complexity
+of search in
+4:49
+linked list is O(n)
+because in the worst case,
+4:53
+we need to perform
+4:56
+search over each and every
+node in the linked list.
+4:57
+So the search
+complexity is O(n).
+5:01
+And next, let's see how we can
+5:04
+insert a new node
+into the linked list.
+5:07
+So here, suppose that we
+have linked list with
+5:11
+four nodes and we want to insert
+5:16
+a new node that we call x,
+5:18
+and it holds the value 25.
+5:21
+So since in the linked list
+we already know the head,
+5:25
+so we want to insert
+x before the head,
+5:30
+and so that x becomes
+the new head,
+5:36
+and this is the operation.
+5:39
+So we let x
+5:41
+point to the head.
+5:49
+So say x knows that
+5:52
+the node right after it is
+5:56
+the current head of
+the linked list.
+5:58
+And then we let
+6:01
+the current head know that
+its previous node is x.
+6:05
+And then we assign x as
+the new head so that
+6:10
+the new node x goes
+to the linked list
+6:16
+as the first node and it
+becomes the new head.
+6:19
+So here, in all of
+these operations
+6:23
+we're only performing operations
+6:27
+over the new node
+x and the head,
+6:33
+so the time complex is O(1).
+6:36
+And next it is the
+deletion function.
+6:40
+So from the name,
+6:43
+you can see that
+our purpose is to
+6:45
+delete the node x
+from the linked list.
+6:47
+Suppose here we want to
+delete this node x from it,
+6:51
+and what we do is that we don't
+6:55
+physically remove this
+node and instead,
+6:57
+we revise the links in
+7:00
+the linked list so that
+the node x still exists,
+7:06
+but it is excluded
+from the linked list.
+7:12
+And the way that we do it
+is that this is x.previous.
+7:14
+So we let the previous
+node go across
+7:19
+x and we also let the
+next node go across x.
+7:23
+So in this way x is removed
+from the linked list,
+7:27
+even though it still
+exists in the memory.
+7:33
+And the time complexity
+of deletion function is
+7:36
+also one because we're only
+7:40
+dealing with the neighbors of x.
+7:42
+So these are all the operations
+7:45
+of linked list. Thank you.
+7:49

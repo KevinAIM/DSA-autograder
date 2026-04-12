@@ -7,5 +7,32 @@
   "slides_pdf": "slides/CSITBG2 Module 5.pdf",
   "package": "M5",
   "student_class": "",
-  "timeout_sec": 5.0
+  "timeout_sec": 5.0,
+  "slides_url": "https://kevinaim.github.io/DSA-autograder/slides/CSITBG2%20Module%205.pdf",
+  "videos": [
+  {
+    "title": "M5a: Stack and Queue",
+    "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=7b872f43-8a69-4faf-8d32-b30100f633ea",
+    "captions": "captions/m5a_stack_queue.txt",
+    "methods": ["Stack", "Queue"]
+  },
+  {
+    "title": "M5b: Linked List",
+    "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9a716ce0-f3fc-4788-889a-b30100f633e1",
+    "captions": "captions/m5b_linked_list.txt",
+    "methods": ["LinkedList"]
+  },
+  {
+    "title": "M5c: Binary Search Tree I",
+    "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=3470a8e0-de51-4c63-9d21-b30100f633e7",
+    "captions": "captions/m5c_bst_1.txt",
+    "methods": ["BinarySearchTree"]
+  },
+  {
+    "title": "M5d: Binary Search Tree II and Hash Table",
+    "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=d23f4984-638c-4e85-a6bf-b30100f64013",
+    "captions": "captions/m5d_bst_2_hash.txt",
+    "methods": []
+  }
+]
 }

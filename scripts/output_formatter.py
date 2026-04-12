@@ -29,9 +29,9 @@ def format_output(result, config=None):
             print(f"   {i}. {step}", flush=True)
         link = slides_link()
         if link:
-            print(f"\n   📄 Slides: {link}", flush=True)
+            print(f"\n   Slides: {link}", flush=True)
         if video_url and attempt == 3:
-            print(f"\n   🎥 Video: {video_url}", flush=True)
+            print(f"\n   Video: {video_url}", flush=True)
 
     elif status == "runtime_error":
         print(f"[RUNTIME ERROR] {name}", flush=True)
@@ -40,9 +40,9 @@ def format_output(result, config=None):
             print(f"   {i}. {step}", flush=True)
         link = slides_link()
         if link:
-            print(f"\n   📄 Slides: {link}", flush=True)
+            print(f"\n   Slides: {link}", flush=True)
         if video_url and attempt == 3:
-            print(f"\n   🎥 Video: {video_url}", flush=True)
+            print(f"\n   Video: {video_url}", flush=True)
 
     elif status == "compile_error":
         print(f"[COMPILE ERROR] {name}", flush=True)
@@ -51,9 +51,9 @@ def format_output(result, config=None):
             print(f"   {i}. {step}", flush=True)
         link = slides_link()
         if link:
-            print(f"\n   📄 Slides: {link}", flush=True)
+            print(f"\n   Slides: {link}", flush=True)
         if video_url and attempt == 3:
-            print(f"\n   🎥 Video: {video_url}", flush=True)
+            print(f"\n   Video: {video_url}", flush=True)
 
     elif status == "blocked":
         print(f"[BLOCKED] {name}", flush=True)

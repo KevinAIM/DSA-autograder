@@ -7,5 +7,26 @@
   "slides_pdf": "slides/CSITBG2 Module 6.pdf",
   "package": "M6",
   "student_class": "",
-  "timeout_sec": 5.0
+  "timeout_sec": 5.0,
+  "slides_url": "https://kevinaim.github.io/DSA-autograder/slides/CSITBG2%20Module%206.pdf",
+  "videos": [
+  {
+    "title": "M6a: Dynamic Programming",
+    "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=975b4251-164b-49ca-ad68-b33200f960ee",
+    "captions": "captions/m6a_dynamic_programming.txt",
+    "methods": ["RodCut", "LCS"]
+  },
+  {
+    "title": "M6b: Rod-cutting Problem",
+    "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=a81a6ab4-56cb-44ed-a754-b33200f960ee",
+    "captions": "captions/m6b_rod_cutting.txt",
+    "methods": ["RodCut"]
+  },
+  {
+    "title": "M6c: Longest Common Subsequence",
+    "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=0a077f94-f545-4071-b0e8-b33200f960ee",
+    "captions": "captions/m6c_lcs.txt",
+    "methods": ["LCS"]
+  }
+]
 }

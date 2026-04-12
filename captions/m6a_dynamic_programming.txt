@@ -1,0 +1,299 @@
+>> Hello, everyone.
+Welcome to the module.
+0:00
+And today, we're going to talk
+about dynamic programming.
+0:03
+Dynamic programming is
+0:07
+a powerful algorithm
+design paradigm
+0:09
+that is often used to solve
+complicated problems.
+0:14
+So giving a huge and
+complicated problem,
+0:18
+the best way is
+to divide it into
+0:22
+sub problems and tackle each
+sub problem individually.
+0:25
+If you remember that in
+the previous modules
+0:29
+we learned this
+similar philosophy
+0:33
+named divide and conquer before.
+0:36
+In divide and conquer,
+giving a big problem,
+0:38
+we can divide the
+input problem to
+0:41
+two or three non
+0:45
+overlapping subproblems
+so that we can work
+0:48
+on each subproblem
+individually and
+0:51
+later we're going to
+combine the solutions
+0:54
+to the subproblems
+together so that we get
+0:57
+the whole solution to the
+original big problem.
+1:00
+That is divide and conquer.
+1:05
+But in dynamic programming,
+1:09
+the problem is different.
+1:13
+So given the input problem,
+1:16
+we cannot divide it into non
+overlapping sub problems.
+1:18
+For example, over here,
+giving a bigger array,
+1:23
+we can only divide it
+into sub arrays that
+1:26
+share some parts of
+them in between.
+1:30
+For example, giving
+this big input array,
+1:35
+we can divide into four
+or five sub arrays
+1:38
+where they do overlap.
+1:42
+And in case of the
+overlap, we cannot use.
+1:44
+In case of the overlap,
+1:49
+it means that we cannot
+1:52
+use divide and
+conquer to solve it.
+1:54
+Instead we should use
+dynamic programming.
+1:57
+This is the fundamental
+difference between
+2:00
+the problems that can be solved
+2:04
+by dynamic programming
+and dividing conquer.
+2:07
+Again, it depends on if the
+sub problems overlap or not.
+2:10
+So if we want
+2:14
+to solve a problem by
+using dynamic programming,
+2:19
+there are several steps.
+2:22
+The first one is that
+we need to break
+2:24
+the problem into several
+overlapping sub problems,
+2:27
+and then we will
+need to say solve
+2:31
+each subproblem recursively
+individually, but only once.
+2:35
+Here, to help us only solve
+2:41
+one sub problem exactly once
+2:44
+without repeatedly solving
+the same sub problems,
+2:46
+we usually store the results
+of those sub problems
+2:49
+in our hard drive or in
+2:53
+our memory so that later
+we can retrieve it.
+2:55
+You can consider it as, say,
+2:58
+if you have a professor
+who gives you
+3:01
+repeated questions
+over the semester.
+3:04
+If you know the professor
+has this pattern,
+3:07
+then what you should do
+3:10
+is that every time when
+you solve a new question,
+3:12
+you store the solution
+3:16
+of the question in
+your hard drive.
+3:18
+Next time when you see
+this question again,
+3:20
+you're not going to work
+on it from scratch.
+3:23
+To save your time, you're
+3:26
+just going to go
+to your computer,
+3:28
+find a folder and
+get the solution.
+3:30
+So that is the trick in
+dynamic programming.
+3:33
+So we store the solutions to
+3:36
+the sub problems in
+someplace in memory in
+3:40
+most of the case and to save
+the computational time.
+3:43
+So here, I just want to
+give you a quick example
+3:48
+of the power of
+dynamic programming.
+3:51
+So the famous example
+is Fibonacci sequence.
+3:55
+So yes, giving n is the index.
+3:59
+The Fibonacci number can
+be calculated in this way.
+4:07
+If n is 0,
+4:10
+then the Fibonacci number is 0.
+4:12
+If n is 1,
+4:14
+then the Fibonacci number is 1.
+4:15
+Otherwise, it is
+going to be F-1+F-2.
+4:16
+So if we use divide and conquer,
+4:22
+which is a recursive algorithm
+to solve this problem,
+4:25
+the pseudo code is
+here. It's very easy.
+4:28
+But here, this problem,
+4:32
+so the coding part is very easy,
+4:35
+but when we run this algthm you
+4:38
+will find it very slow giving
+4:40
+a large N number because
+4:43
+it has to repeatedly
+solve the same,
+4:45
+calculate the same Fibonacci
+number multiple times.
+4:50
+Well, if we use
+dynamic programming,
+4:53
+the small ways that we
+store the solution,
+4:56
+the answers were the
+Fibonacci numbers in array.
+5:00
+For example, here
+in the beginning,
+5:06
+we know that the 00d1 is 1.
+5:08
+When we calculate the
+next Fibonacci number,
+5:11
+we're not going to calculate,
+5:14
+say, Fibonacci number i-1,
+5:16
+Fibonacci number
+i-2, like what we
+5:19
+did in divide and conquer.
+5:22
+Instead, we're just
+going to go to
+5:24
+the array and find the numbers.
+5:25
+With such a trick,
+5:28
+we reduce the time complexity
+from O(n)^2 to O(n).
+5:31
+So the dynamic solution
+is much more efficient.
+5:35
+And in real world engineering,
+5:39
+so this is a very good
+practice because we
+5:42
+can sacrifice a little
+bit of our memory space.
+5:45
+Here we store the Fibonacci
+numbers in our array.
+5:49
+Yes, we sacrifice a
+little on the memory,
+5:54
+but we save huge on the time.
+5:59
+This is a very practical
+algorithm design.
+6:01
+Next, we're going
+to learn more about
+6:05
+dynamic programming by using
+two real world examples.
+6:08

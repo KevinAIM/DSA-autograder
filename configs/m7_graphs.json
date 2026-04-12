@@ -7,5 +7,26 @@
   "slides_pdf": "slides/CSITBG2 Module 7.pdf",
   "package": "M7",
   "student_class": "Graph",
-  "timeout_sec": 5.0
+  "timeout_sec": 5.0,
+  "slides_url": "https://kevinaim.github.io/DSA-autograder/slides/CSITBG2%20Module%207.pdf",
+  "videos": [
+  {
+    "title": "M7a: Graph and Breadth-First Search",
+    "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=427ffc0a-3601-4a21-9592-b33200f9b528",
+    "captions": "captions/m7a_bfs.txt",
+    "methods": ["Graph"]
+  },
+  {
+    "title": "M7b & M7c: Depth-First Search",
+    "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=947bea5a-9689-497d-8815-b33200f9b51f",
+    "captions": "captions/m7b_dfs.txt",
+    "methods": []
+  },
+  {
+    "title": "M7d: Single-Source Shortest Path",
+    "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=b79ecaa8-27dc-4f11-a034-b33200f9b51b",
+    "captions": "captions/m7d_shortest_path.txt",
+    "methods": []
+  }
+]
 }

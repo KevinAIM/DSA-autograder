@@ -7,21 +7,18 @@ from openai import OpenAI
 import os
 from scripts.attempt_tracker import get_attempt, increment_attempt, reset_attempt
 import sys
-from scripts.formatter import format_output
+from scripts.output_formatter import format_output
+from scripts.video_search import get_video_url
 
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
-
-
 def parse_harness_stdout(stdout: str) -> dict:
     s = stdout or ""
-    # Find the first JSON object start
     start = s.find("{")
     if start == -1:
         return {"status": "unknown", "raw": stdout}
-
     s2 = s[start:]
     try:
         obj, _ = json.JSONDecoder().raw_decode(s2)
@@ -30,17 +27,43 @@ def parse_harness_stdout(stdout: str) -> dict:
         return {"status": "unknown", "raw": stdout}
 
 
+def method_name(method: dict) -> str:
+    return method.get("method_name") or method.get("class_name")
+
+
+def build_reference_text(adapter, method: dict, client: OpenAI) -> str:
+    ref_text = method.get("pseudo_code", "")
+    if not adapter.db_path or not adapter.db_path.exists():
+        return ref_text
+
+    try:
+        retrieved = query_slides(method_name(method), adapter.db_path, client)
+    except Exception:
+        return ref_text
+
+    if not retrieved:
+        return ref_text
+
+    return "\n\n".join([f"Slide {r['slide']}] {r['text']}" for r in retrieved])
+
+
+def build_video_url(name: str, config: dict, attempt: int, extra_keywords=None) -> str | None:
+    if attempt != 3:
+        return None
+    try:
+        return get_video_url(name, config, extra_keywords=extra_keywords)
+    except Exception:
+        return None
+
 
 def main():
 
-    student_id = "student_001"  # in real use, get this from the environment or request
+    student_id = "student_001"
 
-    #load config
     config_path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("configs/m4_sorts.json")
     with open(config_path, "r") as f:
         config = json.load(f)
 
-    #load adapter from registry
     from adapters.registry import REGISTRY
     adapter_class = REGISTRY[config["adapter"]]
     adapter = adapter_class(
@@ -60,96 +83,71 @@ def main():
         if scan["status"] != "ok":
             result = {"status": "blocked", "scan": scan}
             result["feedback"] = generate_feedback(result, source, adapter.name, "N/A", 1, "N/A")
-            format_output(result)
+            result["attempt"] = 1
+            format_output(result, config)
             return
-        
-    source = "\n".join(read_text(str(f)) for f in adapter.student_files)
-    
 
-    # 2 compile student + harness
+    source = "\n".join(read_text(str(f)) for f in adapter.student_files)
+
+    # 2) compile student
     c1 = compile_java([str(f) for f in adapter.student_files])
     if c1["status"] != "ok":
         result = {"status": "compile_error", "which": "student", "compile": c1}
-
         result["feedback"] = generate_feedback(result, source, adapter.name, "N/A", 1, "N/A")
-        format_output(result)
-
-
+        result["attempt"] = 1
+        format_output(result, config)
         return
 
-
-
     for method in adapter.methods():
+        name = method_name(method)
 
-        # 2) generate harness
         harness_path = Path("harness/Harness.java")
         harness_path.parent.mkdir(parents=True, exist_ok=True)
         adapter.write_harness(harness_path, method)
 
         c2 = compile_java(str(harness_path))
         if c2["status"] != "ok":
-                        #retrieve relevant slidesd
-            ref_text = method.get("pseudo_code", "") #fallback if no pseudo code provided
-            if adapter.db_path and adapter.db_path.exists():
-                query = f"{method.get('method_name') or method.get('class_name')}"
-                retrieved = query_slides(query, adapter.db_path, client)
-                ref_text = "\n\n".join([f"Slide {r['slide']}] {r['text']}" for r in retrieved])
+            result = {"status": "compile_error",
+                      "which": "harness",
+                      "compile": c2,
+                      "method": name}
 
-            result = {"status": "compile_error", 
-                      "which": "harness", 
-                      "compile": c2, 
-                      "method": method.get("method_name") or method.get("class_name")}
-
-            attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
-            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
-            format_output(result)
-
+            attempt = get_attempt(student_id, adapter.module, name)
+            result["feedback"] = generate_feedback(result, source, adapter.name, build_reference_text(adapter, method, client), attempt, name)
+            result["attempt"] = attempt
+            result["video_url"] = build_video_url(name, config, attempt)
+            format_output(result, config)
             continue
 
-        # 4) run harness
         run = run_java(adapter.harness_main_class(), timeout_sec=adapter.timeout_sec)
         if run["status"] != "ok":
-            increment_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
-                                #retrieve relevant slides
-            ref_text = method.get("pseudo_code", "") #fallback if no pseudo code provided
-            if adapter.db_path and adapter.db_path.exists():
-                query = f"{method.get('method_name') or method.get('class_name')}"
-                retrieved = query_slides(query, adapter.db_path, client)
-                ref_text = "\n\n".join([f"Slide {r['slide']}] {r['text']}" for r in retrieved])
+            increment_attempt(student_id, adapter.module, name)
 
-            result = {"status": "runtime_error", 
-                      "run": run, 
-                      "method": method.get("method_name") or method.get("class_name")}
+            result = {"status": "runtime_error",
+                      "run": run,
+                      "method": name}
 
-            attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
-            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
-            format_output(result)
-
+            attempt = get_attempt(student_id, adapter.module, name)
+            result["feedback"] = generate_feedback(result, source, adapter.name, build_reference_text(adapter, method, client), attempt, name)
+            result["attempt"] = attempt
+            result["video_url"] = build_video_url(name, config, attempt)
+            format_output(result, config)
             continue
 
-        # 5) parse harness result
         h = parse_harness_stdout(run.get("stdout", ""))
 
         if h.get("status") == "pass":
-            name = method.get("method_name") or method.get("class_name")
             key = "method" if method.get("method_name") else "class"
-            format_output({"status": "pass", key: name})
-            reset_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
-
+            format_output({"status": "pass", key: name}, config)
+            reset_attempt(student_id, adapter.module, name)
             continue
 
         if h.get("status") == "fail":
-            increment_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
-            # retrieve relevant slides
-            ref_text = method.get("pseudo_code", "")
-            if adapter.db_path and adapter.db_path.exists():
-                query = f"{method.get('method_name') or method.get('class_name')}"
-                retrieved = query_slides(query, adapter.db_path, client)
-                ref_text = "\n\n".join([f"Slide {r['slide']}] {r['text']}" for r in retrieved])
+            increment_attempt(student_id, adapter.module, name)
 
             result = {
                 "status": "fail",
-                "method": method.get("method_name") or method.get("class_name"),
+                "method": name,
             }
             if h.get("testIndex") is not None:
                 result["testIndex"] = h.get("testIndex")
@@ -162,20 +160,20 @@ def main():
             if h.get("reason") is not None:
                 result["reason"] = h.get("reason")
 
-            attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
-            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
-            format_output(result)
-            
+            attempt = get_attempt(student_id, adapter.module, name)
+            result["feedback"] = generate_feedback(result, source, adapter.name, build_reference_text(adapter, method, client), attempt, name)
+            result["attempt"] = attempt
+            result["video_url"] = build_video_url(
+                name,
+                config,
+                attempt,
+                extra_keywords=["key", "shift", "index", "pseudocode", "array", "while"]
+            )
+            format_output(result, config)
             continue
-        
+
         if h.get("status") == "error":
-                        #retrieve relevant slides
-            ref_text = method.get("pseudo_code", "") #fallback if no pseudo code provided
-            if adapter.db_path and adapter.db_path.exists():
-                query = f"{method.get('method_name') or method.get('class_name')}"
-                retrieved = query_slides(query, adapter.db_path, client)
-                ref_text = "\n\n".join([f"Slide {r['slide']}] {r['text']}" for r in retrieved])
-            increment_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
+            increment_attempt(student_id, adapter.module, name)
 
             result = {
                 "status": "runtime_error",
@@ -183,23 +181,22 @@ def main():
                 "testIndex": h.get("testIndex"),
                 "input": h.get("input"),
                 "exception": h.get("exception"),
-                "method": method.get("method_name") or method.get("class_name")
+                "method": name
             }
 
-            attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
-            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
-            format_output(result)
-
-
+            attempt = get_attempt(student_id, adapter.module, name)
+            result["feedback"] = generate_feedback(result, source, adapter.name, build_reference_text(adapter, method, client), attempt, name)
+            result["attempt"] = attempt
+            result["video_url"] = build_video_url(name, config, attempt)
+            format_output(result, config)
             continue
 
-
         result = {"status": "unknown_harness_output", "harness": h, "raw": run}
-
-        ref_text = method.get("pseudo_code", "")
-        attempt = get_attempt(student_id, adapter.module, method.get("method_name") or method.get("class_name"))
-        result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, method.get("method_name") or method.get("class_name"))
-        format_output(result)
+        attempt = get_attempt(student_id, adapter.module, name)
+        result["feedback"] = generate_feedback(result, source, adapter.name, build_reference_text(adapter, method, client), attempt, name)
+        result["attempt"] = attempt
+        result["video_url"] = build_video_url(name, config, attempt)
+        format_output(result, config)
 
 if __name__ == "__main__":
     main()

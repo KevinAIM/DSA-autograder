@@ -25,8 +25,8 @@ public class Queue {
 	 * Implement the ENQUEUE(Q, x) function
 	 */
 	public void enqueue (int x) {
-	    tail = (tail + 1) % size;	//increments first
-        array[tail] = x;	 		//then stores - wrong order
+	    array[tail] = x;
+        tail = (tail + 1) % size;
 	}
 	
 	/*

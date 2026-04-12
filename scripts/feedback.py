@@ -68,15 +68,18 @@ def _llm_generate(prompt: str) -> str:
             "Check: method signature, loop bounds, and shifting logic."
         )
 
-    client = OpenAI(api_key=api_key)
+    try:
+        client = OpenAI(api_key=api_key)
+        resp = client.responses.create(
+            model=model,
+            input=prompt,
+        )
+    except Exception:
+        return (
+            "Feedback generation is temporarily unavailable. "
+            "Use the failing case details to check method signatures, loop bounds, base cases, and index updates."
+        )
 
-    # Keep it strict and short. JSON output so you can parse it reliably.
-    resp = client.responses.create(
-        model=model,
-        input=prompt,
-    )
-
-    # responses API returns output_text helper in recent SDKs; fallback if not present.
     text = getattr(resp, "output_text", None)
     if isinstance(text, str) and text.strip():
         return text.strip()
@@ -108,7 +111,7 @@ def generate_feedback(
     elif attempt == 2:
         hint_level = "Give a more specific hint. Reference the specific pseudocode line that is relevant."
     elif attempt == 3:
-        hint_level = "Give a detailed explanation of what is wrong and why."
+        hint_level = "Give a detailed explanation of what is wrong and why, but do NOT reveal the actual fix or corrected code. Explain the concept and what the student should look for, without giving the solution."
     else:
         hint_level = "Give the full solution with a complete explanation."
         
@@ -135,6 +138,7 @@ Return STRICT JSON with keys:
 - short_explanation: string (2-4 sentences)
 - next_steps: array of 1-3 concrete actions
 - references: array of objects {{id: string, reason: string}}
+- slide_number: integer or null (the slide number you cited, e.g. 6 if you said "See Slide 6", null if no slide cited)
 
 Context:
 STATUS: {result.get("status")}

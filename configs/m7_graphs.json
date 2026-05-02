@@ -13,19 +13,19 @@
   {
     "title": "M7a: Graph and Breadth-First Search",
     "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=427ffc0a-3601-4a21-9592-b33200f9b528",
-    "captions": "captions/m7a_bfs.txt",
+    "captions": "captions/m7a_bfs.vtt",
     "methods": ["Graph"]
   },
   {
     "title": "M7b & M7c: Depth-First Search",
     "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=947bea5a-9689-497d-8815-b33200f9b51f",
-    "captions": "captions/m7b_dfs.txt",
+    "captions": "captions/m7b_dfs.vtt",
     "methods": []
   },
   {
     "title": "M7d: Single-Source Shortest Path",
     "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=b79ecaa8-27dc-4f11-a034-b33200f9b51b",
-    "captions": "captions/m7d_shortest_path.txt",
+    "captions": "captions/m7d_shortest_path.vtt",
     "methods": []
   }
 ],
@@ -33,5 +33,5 @@
   {"file": "M7/Graph.java", "canvas_id": "20948618"}
 ],
 "canvas_course_id": "204637",
-"canvas_assignment_id": "TBD"
+"canvas_assignment_id": "2406060"
 }

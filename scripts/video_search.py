@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 def _parse_captions(caption_path: str) -> list[dict]:
-    """Parse Panopto caption file into chunks with timestamps."""
+    """Parse caption file — supports both VTT and Panopto copy-paste format."""
     text = Path(caption_path).read_text(encoding="utf-8")
     lines = text.splitlines()
 
@@ -16,7 +16,25 @@ def _parse_captions(caption_path: str) -> list[dict]:
         if not line:
             continue
 
-        # Match timestamp like 0:00, 1:23, 12:34
+        # Skip VTT header and NOTE blocks
+        if line == "WEBVTT" or line.startswith("NOTE"):
+            continue
+
+        # VTT timestamp: 00:00.000 --> 00:03.860 or 00:00:00.000 --> 00:00:03.860
+        vtt_match = re.match(r"(\d+):(\d{2})[\.:]\d+ --> ", line)
+        if vtt_match:
+            minutes, seconds = int(vtt_match.group(1)), int(vtt_match.group(2))
+            ts_seconds = minutes * 60 + seconds
+            if current_lines:
+                entries.append({
+                    "text": " ".join(current_lines),
+                    "start": current_ts
+                })
+            current_lines = []
+            current_ts = ts_seconds
+            continue
+
+        # Panopto copy-paste timestamp: 0:00 or 1:23
         ts_match = re.fullmatch(r"(\d+):(\d{2})", line)
         if ts_match:
             minutes, seconds = int(ts_match.group(1)), int(ts_match.group(2))
@@ -28,15 +46,17 @@ def _parse_captions(caption_path: str) -> list[dict]:
                 })
             current_lines = []
             current_ts = ts_seconds
-        elif line.startswith(">>"):
-            # Speaker change marker — strip it but keep the text after
+            continue
+
+        # Speaker change marker
+        if line.startswith(">>"):
             remainder = line[2:].strip()
             if remainder:
                 current_lines.append(remainder)
-        else:
-            current_lines.append(line)
+            continue
 
-    # flush last chunk
+        current_lines.append(line)
+
     if current_lines:
         entries.append({"text": " ".join(current_lines), "start": current_ts})
 

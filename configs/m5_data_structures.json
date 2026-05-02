@@ -13,25 +13,25 @@
   {
     "title": "M5a: Stack and Queue",
     "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=7b872f43-8a69-4faf-8d32-b30100f633ea",
-    "captions": "captions/m5a_stack_queue.txt",
+    "captions": "captions/m5a_stack_queue.vtt",
     "methods": ["Stack", "Queue"]
   },
   {
     "title": "M5b: Linked List",
     "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=9a716ce0-f3fc-4788-889a-b30100f633e1",
-    "captions": "captions/m5b_linked_list.txt",
+    "captions": "captions/m5b_linked_list.vtt",
     "methods": ["LinkedList"]
   },
   {
     "title": "M5c: Binary Search Tree I",
     "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=3470a8e0-de51-4c63-9d21-b30100f633e7",
-    "captions": "captions/m5c_bst_1.txt",
+    "captions": "captions/m5c_bst_1.vtt",
     "methods": ["BinarySearchTree"]
   },
   {
     "title": "M5d: Binary Search Tree II and Hash Table",
     "panopto_url": "https://montclair.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=d23f4984-638c-4e85-a6bf-b30100f64013",
-    "captions": "captions/m5d_bst_2_hash.txt",
+    "captions": "captions/m5d_bst_2_hash.vtt",
     "methods": []
   }
 ],
@@ -44,5 +44,5 @@
   {"file": "M5/TreeNode.java", "canvas_id": "21040447"}
 ],
 "canvas_course_id": "204637",
-"canvas_assignment_id": "TBD"
+"canvas_assignment_id": "2371093"
 }

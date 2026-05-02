@@ -28,5 +28,9 @@
     "captions": "captions/m6c_lcs.txt",
     "methods": ["LCS"]
   }
+],
+"skeleton_files": [
+  {"file": "M6/RodCut.java", "canvas_id": "20948613"},
+  {"file": "M6/LCS.java", "canvas_id": "20948614"}
 ]
 }

@@ -28,5 +28,8 @@
     "captions": "captions/m7d_shortest_path.txt",
     "methods": []
   }
+],
+"skeleton_files": [
+  {"file": "M7/Graph.java", "canvas_id": "20948618"}
 ]
 }

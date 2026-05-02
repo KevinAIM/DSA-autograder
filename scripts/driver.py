@@ -9,6 +9,7 @@ from scripts.attempt_tracker import get_attempt, increment_attempt, reset_attemp
 import sys
 from scripts.output_formatter import format_output
 from scripts.video_search import get_video_url
+from scripts.malware_check import run_malware_checks
 
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -88,6 +89,17 @@ def main():
             return
 
     source = "\n".join(read_text(str(f)) for f in adapter.student_files)
+
+    canvas_token = os.getenv("CANVAS_TOKEN", "").strip()
+    if canvas_token and config.get("skeleton_files"):
+        student_file_sources = [{"file": str(f), "source": read_text(str(f))} for f in adapter.student_files]
+        malware_result = run_malware_checks(student_file_sources, config["skeleton_files"], canvas_token)
+        if malware_result["status"] == "malware_suspected":
+            result = {"status": "blocked", "scan": {"status": "blocked", "safe_to_run": False, "reasons": [{"rule": "malware_suspected", "match": r.get("reason", ""), "line": 0} for r in malware_result["files"] if r.get("status") == "malware_suspected"], "warnings": []}}
+            result["feedback"] = generate_feedback(result, source, adapter.name, "N/A", 1, "N/A")
+            result["attempt"] = 1
+            format_output(result, config)
+            return
 
     # 2) compile student
     c1 = compile_java([str(f) for f in adapter.student_files])

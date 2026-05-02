@@ -28,5 +28,8 @@
     "captions": "captions/m4c_quick_sort.txt",
     "methods": ["quick_sort", "partition"]
   }
+],
+"skeleton_files": [
+  {"file": "M4/Sort.java", "canvas_id": "20915447"}
 ]
 }

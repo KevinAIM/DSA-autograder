@@ -17,7 +17,7 @@ public static int[] insertionSort (int[] array) {
             i--;
         }
 
-        array[i - 1] = key;
+        array[i + 1] = key;
     }
 
     return array;

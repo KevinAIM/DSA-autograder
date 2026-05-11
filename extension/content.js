@@ -11,12 +11,9 @@ function addAutograderButton() {
     // Don't add button if it already exists
     if (document.getElementById('autograder-btn')) return;
 
-    // Find the submit button area on the Canvas assignment page
-    const submitArea = document.querySelector('.submit_assignment_link') ||
-                       document.querySelector('#submit_assignment') ||
-                       document.querySelector('.assignment-submission-default');
-
-    if (!submitArea) return;
+    // Find the assignment container — exists for both teachers and students
+    const container = document.querySelector('#assignment_show');
+    if (!container) return;
 
     // Create button
     const btn = document.createElement('button');
@@ -69,8 +66,9 @@ function addAutograderButton() {
         }
     });
 
-    submitArea.parentNode.insertBefore(btn, submitArea.nextSibling);
-    submitArea.parentNode.insertBefore(panel, btn.nextSibling);
+    // Append button and panel to the assignment container
+    container.appendChild(btn);
+    container.appendChild(panel);
 }
 
 function getCourseId() {

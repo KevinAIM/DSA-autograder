@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            width: 300px;
+            padding: 16px;
+            font-family: Arial, sans-serif;
+            background: #fff;
+        }
+
+        h2 {
+            color: #8B0000;
+            margin: 0 0 8px 0;
+            font-size: 16px;
+        }
+
+        p {
+            font-size: 13px;
+            color: #555;
+            margin: 0 0 12px 0;
+        }
+
+        .status {
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .status.connected {
+            background: #e6f4ea;
+            color: #2d7a3a;
+        }
+
+        .status.disconnected {
+            background: #fdecea;
+            color: #a33;
+        }
+    </style>
+</head>
+<body>
+    <h2>DSA Autograder</h2>
+    <p>Navigate to a Canvas assignment page to get feedback on your submission.</p>
+    <div class="status disconnected" id="server-status">
+        Checking server...
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

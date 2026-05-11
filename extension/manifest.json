@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "DSA Autograder",
+  "version": "1.0",
+  "description": "Automatic feedback for DSA assignments",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://montclair.instructure.com/*",
+    "http://localhost:5000/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://montclair.instructure.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "DSA Autograder"
+  }
+}

@@ -95,37 +95,70 @@ def main():
     config_path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("configs/m4_sorts.json")
     with open(config_path, "r") as f:
         config = json.load(f)
-    
-    slides_path = Path(config["slides_pdf"])
+
     db_path = Path(config["db_path"])
-    extracted_path = slides_path.with_suffix("").parent / (slides_path.stem + "_extracted.json")
-    
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-    # load from cache if exists, otherwise extract
-    if extracted_path.exists():
-        print("Loading from cached extraction...")
-        with open(extracted_path, "r", encoding="utf-8") as f:
-            slide_texts = json.load(f)
-    else:
-        images = pdf_to_images(slides_path)
-        print(f"Loaded {len(images)} slides")
-        slide_texts = []
-        for i, image in enumerate(images):
-            print(f"Processing slide {i+1}/{len(images)}...")
-            text = extract_text_from_image(image, client)
-            slide_texts.append({"slide": i+1, "text": text})
-        with open(extracted_path, "w", encoding="utf-8") as f:
-            json.dump(slide_texts, f, ensure_ascii=False, indent=2)
+    # collect all slide files to process
+    slide_files = []
 
-    print(f"Loaded {len(slide_texts)} slides")
+    # old style config — single slides_pdf
+    if "slides_pdf" in config:
+        slide_files.append(Path(config["slides_pdf"]))
 
+    # new style config — files array from setup_course
+    for f in config.get("files", []):
+        path = f.get("url") or f.get("name")
+        local_path = Path("slides") / f["name"]
+        if not local_path.exists():
+            # download from Canvas if not already local
+            print(f"Downloading {f['name']}...")
+            import requests
+            token = os.getenv("CANVAS_TOKEN", "")
+            r = requests.get(f["url"], headers={"Authorization": f"Bearer {token}"})
+            local_path.parent.mkdir(parents=True, exist_ok=True)
+            local_path.write_bytes(r.content)
+        slide_files.append(local_path)
+
+    if not slide_files:
+        print("[ERROR] No slide files found in config.")
+        return
+
+    # check if vector store already populated
     chroma_client = chromadb.PersistentClient(path=str(db_path))
     collection = chroma_client.get_or_create_collection(name="slides")
     if collection.count() > 0:
-        print(f"Vector store already populated with {collection.count()} slides, skipping embedding.")
-    else:
-        embed_and_store(slide_texts, db_path, client)
+        print(f"Vector store already populated with {collection.count()} slides, skipping.")
+        return
+
+    # process each file
+    all_slide_texts = []
+    slide_offset = 0
+
+    for slide_file in slide_files:
+        print(f"\nProcessing {slide_file.name}...")
+        extracted_path = slide_file.with_suffix("").parent / (slide_file.stem + "_extracted.json")
+
+        if extracted_path.exists():
+            print("Loading from cached extraction...")
+            with open(extracted_path, "r", encoding="utf-8") as f:
+                slide_texts = json.load(f)
+        else:
+            images = pdf_to_images(slide_file)
+            print(f"Loaded {len(images)} slides")
+            slide_texts = []
+            for i, image in enumerate(images):
+                print(f"Processing slide {i+1}/{len(images)}...")
+                text = extract_text_from_image(image, client)
+                slide_texts.append({"slide": slide_offset + i + 1, "text": text})
+            with open(extracted_path, "w", encoding="utf-8") as f:
+                json.dump(slide_texts, f, ensure_ascii=False, indent=2)
+
+        all_slide_texts.extend(slide_texts)
+        slide_offset += len(slide_texts)
+
+    print(f"\nTotal slides processed: {len(all_slide_texts)}")
+    embed_and_store(all_slide_texts, db_path, client)
 
 if __name__ == "__main__":
     main()

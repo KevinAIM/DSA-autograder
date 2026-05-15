@@ -10,15 +10,37 @@ from flask_cors import CORS
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 app = Flask(__name__)
-CORS(app)  # Allow requests from the Chrome extension
+CORS(app)
 
-# Map Canvas assignment IDs to configs
-ASSIGNMENT_CONFIG_MAP = {
-    "2371092": "configs/m4_sorts.json",
-    "2371093": "configs/m5_data_structures.json",
-    "2406059": "configs/m6_dp.json",
-    "2406060": "configs/m7_graphs.json",
-}
+
+def load_course_configs() -> dict:
+    """
+    Dynamically load all course configs from the configs/ directory.
+    Returns a dict mapping assignment_id -> config_path.
+    """
+    assignment_map = {}
+    configs_dir = Path("configs")
+
+    for config_file in configs_dir.glob("*.json"):
+        try:
+            with open(config_file) as f:
+                config = json.load(f)
+
+            # handle module-style configs (m4, m5, etc.)
+            assignment_id = config.get("canvas_assignment_id")
+            if assignment_id and assignment_id != "TBD":
+                assignment_map[str(assignment_id)] = str(config_file)
+
+            # handle course-style configs (course_204637.json)
+            for assignment in config.get("assignments", []):
+                aid = str(assignment.get("id", ""))
+                if aid:
+                    assignment_map[aid] = str(config_file)
+
+        except Exception:
+            continue
+
+    return assignment_map
 
 
 @app.route('/ping', methods=['GET'])
@@ -37,11 +59,13 @@ def grade():
     assignment_id = str(data.get("assignment_id", ""))
     canvas_token = os.getenv("CANVAS_TOKEN", "")
 
-    config_path = ASSIGNMENT_CONFIG_MAP.get(assignment_id)
+    # dynamically look up config
+    assignment_map = load_course_configs()
+    config_path = assignment_map.get(assignment_id)
+
     if not config_path:
         return jsonify({"error": f"No config found for assignment {assignment_id}"}), 400
 
-    # Run grade_submissions which pulls from Canvas and runs the driver
     try:
         result = subprocess.run(
             [sys.executable, "-m", "scripts.grade_submissions", config_path],

@@ -12,14 +12,22 @@ from scripts.attempt_tracker import get_attempt, increment_attempt, reset_attemp
 
 CANVAS_BASE = "https://montclair.instructure.com"
 
-
 def get_submissions(course_id: str, assignment_id: str, canvas_token: str) -> list:
-    url = f"{CANVAS_BASE}/api/v1/courses/{course_id}/assignments/{assignment_id}/submissions"
     headers = {"Authorization": f"Bearer {canvas_token}"}
-    params = {"include[]": "attachments", "per_page": 100}
-    r = requests.get(url, headers=headers, params=params)
+    params = {"include[]": "attachments"}
+
+    # try teacher endpoint first
+    url = f"{CANVAS_BASE}/api/v1/courses/{course_id}/assignments/{assignment_id}/submissions"
+    r = requests.get(url, headers=headers, params={**params, "per_page": 100})
+    
+    if r.status_code == 403:
+        # fall back to current user's own submission
+        url = f"{CANVAS_BASE}/api/v1/courses/{course_id}/assignments/{assignment_id}/submissions/self"
+        r = requests.get(url, headers=headers, params=params)
+    
     r.raise_for_status()
-    return r.json()
+    data = r.json()
+    return [data] if isinstance(data, dict) else data
 
 
 def download_attachment(attachment: dict, dest_path: Path, canvas_token: str) -> bool:

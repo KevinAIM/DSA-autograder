@@ -1,0 +1,20 @@
+{
+  "course_id": "212665",
+  "canvas_course_url": "https://montclair.instructure.com/courses/212665",
+  "db_path": "vector_store/course_212665",
+  "files": [
+    {
+      "id": 22936781,
+      "name": "Systems Programming 14.pptx (1).pdf",
+      "url": "https://montclair.instructure.com/files/22936781/download?download_frd=1&verifier=35XzznIFPtvLjQPGGkPWZqxtON7hUuVA21wYm6jb",
+      "type": "pdf"
+    }
+  ],
+  "assignments": [
+    {
+      "id": "2660356",
+      "name": "BASH Code from Todays Class"
+    }
+  ],
+  "videos": []
+}

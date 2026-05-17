@@ -32,20 +32,22 @@ def method_name(method: dict) -> str:
     return method.get("method_name") or method.get("class_name")
 
 
-def build_reference_text(adapter, method: dict, client: OpenAI) -> str:
+def build_reference_text(adapter, method: dict, client: OpenAI) -> tuple[str, float]:
     ref_text = method.get("pseudo_code", "")
     if not adapter.db_path or not adapter.db_path.exists():
-        return ref_text
+        return ref_text, 1.0 #return 1.0 confidence when slides are not available
 
     try:
         retrieved = query_slides(method_name(method), adapter.db_path, client)
     except Exception:
-        return ref_text
+        return ref_text, 1.0
 
     if not retrieved:
-        return ref_text
+        return ref_text, 1.0
 
-    return "\n\n".join([f"Slide {r['slide']}] {r['text']}" for r in retrieved])
+    avg_confidence = sum(r.get("retrieval_confidence", 1.0) for r in retrieved) / len(retrieved)
+    ref_text = "\n\n".join([f"Slide {r['slide']}] {r['text']}" for r in retrieved])
+    return ref_text, round(avg_confidence, 4)
 
 
 def build_video_url(name: str, config: dict, attempt: int, extra_keywords=None) -> str | None:
@@ -125,7 +127,9 @@ def main():
                       "method": name}
 
             attempt = get_attempt(student_id, adapter.module, name)
-            result["feedback"] = generate_feedback(result, source, adapter.name, build_reference_text(adapter, method, client), attempt, name)
+            ref_text, retrieval_confidence = build_reference_text(adapter, method, client)
+            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, name)
+            result["retrieval_confidence"] = retrieval_confidence
             result["attempt"] = attempt
             result["video_url"] = build_video_url(name, config, attempt)
             format_output(result, config)
@@ -140,7 +144,9 @@ def main():
                       "method": name}
 
             attempt = get_attempt(student_id, adapter.module, name)
-            result["feedback"] = generate_feedback(result, source, adapter.name, build_reference_text(adapter, method, client), attempt, name)
+            ref_text, retrieval_confidence = build_reference_text(adapter, method, client)
+            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, name)
+            result["retrieval_confidence"] = retrieval_confidence
             result["attempt"] = attempt
             result["video_url"] = build_video_url(name, config, attempt)
             format_output(result, config)
@@ -173,7 +179,9 @@ def main():
                 result["reason"] = h.get("reason")
 
             attempt = get_attempt(student_id, adapter.module, name)
-            result["feedback"] = generate_feedback(result, source, adapter.name, build_reference_text(adapter, method, client), attempt, name)
+            ref_text, retrieval_confidence = build_reference_text(adapter, method, client)
+            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, name)
+            result["retrieval_confidence"] = retrieval_confidence
             result["attempt"] = attempt
             result["video_url"] = build_video_url(
                 name,
@@ -197,7 +205,9 @@ def main():
             }
 
             attempt = get_attempt(student_id, adapter.module, name)
-            result["feedback"] = generate_feedback(result, source, adapter.name, build_reference_text(adapter, method, client), attempt, name)
+            ref_text, retrieval_confidence = build_reference_text(adapter, method, client)
+            result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, name)
+            result["retrieval_confidence"] = retrieval_confidence
             result["attempt"] = attempt
             result["video_url"] = build_video_url(name, config, attempt)
             format_output(result, config)
@@ -205,7 +215,9 @@ def main():
 
         result = {"status": "unknown_harness_output", "harness": h, "raw": run}
         attempt = get_attempt(student_id, adapter.module, name)
-        result["feedback"] = generate_feedback(result, source, adapter.name, build_reference_text(adapter, method, client), attempt, name)
+        ref_text, retrieval_confidence = build_reference_text(adapter, method, client)
+        result["feedback"] = generate_feedback(result, source, adapter.name, ref_text, attempt, name)
+        result["retrieval_confidence"] = retrieval_confidence
         result["attempt"] = attempt
         result["video_url"] = build_video_url(name, config, attempt)
         format_output(result, config)

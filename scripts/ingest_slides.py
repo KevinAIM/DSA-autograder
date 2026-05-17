@@ -85,11 +85,22 @@ def query_slides(query: str, db_path: Path, client: OpenAI, n_results: int = 3) 
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=n_results #return top n results
+        include=["documents", "metadatas", "distances"]
     )
     
     docs = results["documents"][0]
     metas = results["metadatas"][0]
-    return [{"text": doc, "slide": meta["slide"]} for doc, meta in zip(docs, metas)]
+    distances = results["distances"][0]
+
+    return [
+        {
+            "text": doc,
+            "slide": meta["slide"],
+            "distance": round(dist, 4),
+            "retrieval_confidence": round(max(0, 1 - dist), 4)
+        }
+        for doc, meta, dist in zip(docs, metas, distances)
+    ]
 
 def main():
     config_path = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("configs/m4_sorts.json")

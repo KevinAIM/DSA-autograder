@@ -139,6 +139,8 @@ Return STRICT JSON with keys:
 - next_steps: array of 1-3 concrete actions
 - references: array of objects {{id: string, reason: string}}
 - slide_number: integer or null (the slide number you cited, e.g. 6 if you said "See Slide 6", null if no slide cited)
+- confidence: integer 1-10 (how confident are you that this feedback is accurate and addresses the actual error)
+- confidence_reason: string (one sentence explaining your confidence level)
 
 Context:
 STATUS: {result.get("status")}

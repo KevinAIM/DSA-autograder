@@ -32,6 +32,13 @@ def format_output(result, config=None):
             print(f"\n   Slides: {link}", flush=True)
         if video_url and attempt == 3:
             print(f"\n   Video: {video_url}", flush=True)
+        confidence = feedback.get("confidence")
+        confidence_reason = feedback.get("confidence_reason", "")
+        if confidence and confidence <= 5:
+            print(f"\n   [Low confidence: {confidence}/10 — {confidence_reason}]", flush=True)
+        retrieval_confidence = result.get("retrieval_confidence", 1.0)
+        if retrieval_confidence < 0.5:
+            print(f"\n   [Low slide relevance: {retrieval_confidence:.2f} — retrieved slides may not be directly related]", flush=True)
 
     elif status == "runtime_error":
         print(f"[RUNTIME ERROR] {name}", flush=True)
@@ -43,6 +50,14 @@ def format_output(result, config=None):
             print(f"\n   Slides: {link}", flush=True)
         if video_url and attempt == 3:
             print(f"\n   Video: {video_url}", flush=True)
+        confidence = feedback.get("confidence")
+        confidence_reason = feedback.get("confidence_reason", "")
+        if confidence and confidence <= 5:
+            print(f"\n   [Low confidence: {confidence}/10 — {confidence_reason}]", flush=True)
+        retrieval_confidence = result.get("retrieval_confidence", 1.0)
+        if retrieval_confidence < 0.5:
+            print(f"\n   [Low slide relevance: {retrieval_confidence:.2f} — retrieved slides may not be directly related]", flush=True)
+
 
     elif status == "compile_error":
         print(f"[COMPILE ERROR] {name}", flush=True)
@@ -54,6 +69,13 @@ def format_output(result, config=None):
             print(f"\n   Slides: {link}", flush=True)
         if video_url and attempt == 3:
             print(f"\n   Video: {video_url}", flush=True)
+        confidence = feedback.get("confidence")
+        confidence_reason = feedback.get("confidence_reason", "")
+        if confidence and confidence <= 5:
+            print(f"\n   [Low confidence: {confidence}/10 — {confidence_reason}]", flush=True)
+        retrieval_confidence = result.get("retrieval_confidence", 1.0)
+        if retrieval_confidence < 0.5:
+            print(f"\n   [Low slide relevance: {retrieval_confidence:.2f} — retrieved slides may not be directly related]", flush=True)
 
     elif status == "blocked":
         print(f"[BLOCKED] {name}", flush=True)

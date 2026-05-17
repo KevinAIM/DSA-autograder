@@ -84,7 +84,7 @@ def query_slides(query: str, db_path: Path, client: OpenAI, n_results: int = 3) 
     # search
     results = collection.query(
         query_embeddings=[query_embedding],
-        n_results=n_results #return top n results
+        n_results=n_results, #return top n results
         include=["documents", "metadatas", "distances"]
     )
     
